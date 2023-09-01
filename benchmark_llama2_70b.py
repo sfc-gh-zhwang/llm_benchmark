@@ -17,6 +17,8 @@ start_time = None
 first_token_time = None
 end_time = None
 output = None
+
+
 def stream_callback(a, result, error):
     # print('stream_callback')
     global first_token_time
@@ -28,6 +30,7 @@ def stream_callback(a, result, error):
     if first_token_time is None:
         first_token_time = end_time
     output = result.as_numpy('output')
+
 
 def benchmark_triton(
     model_name,
@@ -46,10 +49,7 @@ def benchmark_triton(
         start_time = time.time()
         client.start_stream(callback=partial(stream_callback, result_queue))
         client.async_stream_infer(model_name, inputs)
-    try:
-        tokenizer = AutoTokenizer.from_pretrained('/Users/zhwang/models/llama-2-70b-chat-hf')
-    except:
-        tokenizer = AutoTokenizer.from_pretrained('/models/triton/llama-2-70b-chat-hf-ft-streaming_tokenizer/1/')
+    tokenizer = AutoTokenizer.from_pretrained(tokenizer_path)
 
     first_token_latency = first_token_time - start_time
     total_duration = end_time - start_time
