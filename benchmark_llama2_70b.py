@@ -34,9 +34,10 @@ def benchmark_triton(
     tokenizer_path,
     max_output_len,
     batch_size,
+    verbose,
     addr = "localhost:8001"
     ):
-    with grpcclient.InferenceServerClient(addr, verbose=False) as client:
+    with grpcclient.InferenceServerClient(addr, verbose=verbose) as client:
         result_queue = mp.Queue()
         inputs = [
             _input("text", np.array([''] * batch_size, dtype=object).reshape(-1, 1)),
@@ -59,7 +60,7 @@ def benchmark_triton(
 
     print('first_token_latency: ', first_token_latency)
     print('total duration', total_duration)
-    print('total tokens generated: ', tokens, 'throughput', , tokens/streaming_duration)
+    print('total tokens generated: ', tokens, 'throughput', tokens/streaming_duration)
 
 parser = argparse.ArgumentParser(description="Benchmark")
 
@@ -68,6 +69,7 @@ parser.add_argument("--model_name", type=str, default='llama-2-70b-chat-hf-ft-st
 parser.add_argument("--tokenizer_path", type=str, default='/models/triton/llama-2-70b-chat-hf-ft-streaming_tokenizer/1/')
 parser.add_argument("--batch_size", type=int, default=1)
 parser.add_argument("--max_output_len", type=int, default=32)
+parser.add_argument("--verbose", type=bool, action="store_true", default=False)
 
 # Parse the command-line arguments
 args = parser.parse_args()
