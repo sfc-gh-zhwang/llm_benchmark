@@ -17,30 +17,32 @@ start_time = None
 first_token_time = None
 end_time = None
 output = None
-
+printed = ''
 
 def stream_callback(a, result, error):
     # print('stream_callback')
     global first_token_time
     global end_time
     global output
+    global printed
     if error:
         raise error
     end_time = time.time()
     if first_token_time is None:
         first_token_time = end_time
     output = result.as_numpy('output')
-
+    decoded = output[0][0].decode()
+    print(decoded[len(printed):], end='')
+    printed=decoded
 
 def benchmark_triton(
     model_name,
     tokenizer_path,
     max_output_len,
     batch_size,
-    verbose,
     addr = "localhost:8001"
     ):
-    with grpcclient.InferenceServerClient(addr, verbose=verbose) as client:
+    with grpcclient.InferenceServerClient(addr, verbose=False) as client:
         result_queue = mp.Queue()
         inputs = [
             _input("text", np.array([''] * batch_size, dtype=object).reshape(-1, 1)),
@@ -69,7 +71,6 @@ parser.add_argument("--model_name", type=str, default='llama-2-70b-chat-hf-ft-st
 parser.add_argument("--tokenizer_path", type=str, default='/models/triton/llama-2-70b-chat-hf-ft-streaming_tokenizer/1/')
 parser.add_argument("--batch_size", type=int, default=1)
 parser.add_argument("--max_output_len", type=int, default=32)
-parser.add_argument("--verbose", type=bool, action="store_true", default=False)
 
 # Parse the command-line arguments
 args = parser.parse_args()
