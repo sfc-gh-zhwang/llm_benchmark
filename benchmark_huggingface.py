@@ -37,7 +37,7 @@ def benchmark_huggingface(
                                     use_cache=True)
         print('generate done')
         for t in new_tokens:
-            tokenizer.decode(t, skip_special_tokens=True)
+            print(tokenizer.decode(t, skip_special_tokens=True))
         print('tokenizer done')
         end_time = time.time()
         print('latency: ', end_time - start_time)
