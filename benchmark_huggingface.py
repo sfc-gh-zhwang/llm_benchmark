@@ -33,7 +33,8 @@ def benchmark_huggingface(
     if streaming:
         pass
     else:
-        new_tokens = model.generate(**tokens, max_new_tokens=max_output_len)
+        new_tokens = model.generate(**tokens, max_new_tokens=max_output_len,
+                                    use_cache=True)
         print('generate done')
         for t in new_tokens:
             tokenizer.decode(t, skip_special_tokens=True)
