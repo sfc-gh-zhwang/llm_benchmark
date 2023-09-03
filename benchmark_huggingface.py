@@ -6,8 +6,8 @@ import torch
 
 
 def warmup(model, tokenizer):
-    input = ['']*10
-    tokens = tokenizer(input, return_tensors='pt')
+    input = ['']*32
+    tokens = tokenizer(input, return_tensors='pt', max_new_tokens=128)
     tokens = tokens.to('cuda')
     model.generate(**tokens)
 
