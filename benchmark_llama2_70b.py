@@ -61,7 +61,7 @@ def benchmark_triton(
     for i in output:
         tokens += len(tokenizer.encode(i[0].decode())) - 1 # get rid of the start token.
 
-    print('first_token_latency: ', first_token_latency)
+    print('\nfirst_token_latency: ', first_token_latency)
     print('total duration', total_duration)
     print('total tokens generated: ', tokens, 'throughput', tokens/streaming_duration)
 
