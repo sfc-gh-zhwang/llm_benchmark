@@ -35,6 +35,7 @@ def stream_callback(a, result, error):
     print(decoded[len(printed):], end='')
     printed=decoded
 
+
 def benchmark_triton(
     model_name,
     tokenizer_path,
@@ -58,7 +59,7 @@ def benchmark_triton(
     streaming_duration = end_time - first_token_time
     tokens = 0
     for i in output:
-        tokens += len(tokenizer.encode(i[0].decode()))
+        tokens += len(tokenizer.encode(i[0].decode())) - 1 # get rid of the start token.
 
     print('first_token_latency: ', first_token_latency)
     print('total duration', total_duration)
