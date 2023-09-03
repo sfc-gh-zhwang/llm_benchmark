@@ -7,9 +7,9 @@ import torch
 
 def warmup(model, tokenizer):
     input = ['']*32
-    tokens = tokenizer(input, return_tensors='pt', max_new_tokens=128)
+    tokens = tokenizer(input, return_tensors='pt')
     tokens = tokens.to('cuda')
-    model.generate(**tokens)
+    model.generate(**tokens, max_new_tokens=128)
 
 
 def benchmark_huggingface(
