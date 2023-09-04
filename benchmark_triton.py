@@ -12,6 +12,9 @@ def _input(name: str, data: np.ndarray) -> grpcclient.InferInput:
     t.set_data_from_numpy(data)
     return t
 
+long_sentence = "A path from a point approximately 330 metres east of the most south westerly corner of 17 Batherton Close, Widnes and approximately 208 metres east-south-east of the most southerly corner of Unit 3 Foundry Industrial Estate, Victoria Street, Widnes, proceeding in a generally east-north-easterly direction for approximately 28 metres to a point approximately 202 metres east-south-east of the most south-easterly corner of Unit 4 Foundry Industrial Estate, Victoria Street, and approximately 347 metres east of the most south-easterly corner of 17 Batherton Close, then proceeding in a generally northerly direction for approximately 21 metres to a point approximately 210 metres east of the most south-easterly corner of Unit 5 Foundry Industrial Estate, Victoria Street, and approximately 202 metres east-south-east of the most north-easterly corner of Unit 4 Foundry Industrial Estate, Victoria Street, then proceeding in a generally east-north-east direction for approximately 64 metres to a point approximately 282 metres east-south-east of the most easterly corner of Unit 2 Foundry Industrial Estate, Victoria Street, Widnes and approximately 259 metres east of the most southerly corner of Unit 4 Foundry Industrial Estate, Victoria Street, then proceeding in a generally east-north-east direction for approximately 350 metres to a point approximately 3 metres west-north-west of the most north westerly corner of the boundary fence of the scrap metal yard on the south side of Cornubia Road, Widnes, and approximately 47 metres west-south-west of the stub end of Cornubia Road be diverted to a 3 metre wide path from a point approximately " \
+    "183 metres east-south-east of the most easterly corner of Unit 5 Foundry Industrial Estate, Victoria Street and approximately 272 metres east of the most north-easterly corner of 26 Ann Street West, Widnes, then proceeding in a generally north easterly direction for approximately 58 metres to a point approximately 216 metres east-south-east of the most easterly corner of Unit 4 Foundry Industrial Estate, Victoria Street and approximately 221 metres east of the most southerly corner of Unit 5 Foundry Industrial Estate, Victoria Street, then proceeding in a generally easterly direction for approximately 45 metres to a point approximately 265 metres east-south-east of the most north-easterly corner of Unit 3 Foundry Industrial Estate, Victoria Street and approximately 265 metres east of the most southerly corner of Unit 5 Foundry Industrial Estate, Victoria Street, then proceeding in a generally east-south-east direction for approximately 102 metres to a point approximately 366 metres east-south-east of the most easterly corner of Unit 3 Foundry Industrial Estate, Victoria Street and approximately 463 metres east of the most north easterly corner of 22 Ann Street West, Widnes, then proceeding in a generally north-north-easterly direction for approximately 19 metres to a point approximately 368 metres east-south-east of the most easterly corner of Unit 3 Foundry Industrial Estate, Victoria Street and approximately 512 metres east of the most south easterly corner of 17 Batherton Close, Widnes then proceeding in a generally east-south, easterly direction for approximately 16 metres to a point approximately 420 metres east-south-east of the " \
+    "most southerly corner of Unit 2 Foundry Industrial Estate, Victoria Street and approximately 533 metres east of the most south-easterly corner of 17 Batherton Close, then proceeding in a generally east-north-easterly direction for approximately 240 metres to a point approximately 606 metres east of the most northerly corner of Unit 4 Foundry Industrial Estate, Victoria Street and approximately 23 metres south of the most south westerly corner of the boundary fencing of the scrap metal yard on the south side of Cornubia Road, Widnes, then proceeding in a generally northern direction for approximately 44 metres to a point approximately 3 metres west-north-west of the most north westerly corner of the boundary fence of the scrap metal yard on the south side of Cornubia Road and approximately 47 metres west-south-west of the stub end of Cornubia Road."
 
 start_time = None
 first_token_time = None
@@ -41,18 +44,25 @@ def benchmark_triton(
     tokenizer_path,
     max_output_len,
     batch_size,
+    input_len,
     addr = "localhost:8001"
     ):
+    tokenizer = AutoTokenizer.from_pretrained(tokenizer_path)
+    if input_len == 1:
+        text = ''
+    else:
+        tokens = tokenizer(long_sentence)['input_ids'][:input_len]
+        text = tokenizer.decode(tokens)
+        print('input token len: ', len(tokens))
     with grpcclient.InferenceServerClient(addr, verbose=False) as client:
         result_queue = mp.Queue()
         inputs = [
-            _input("text", np.array([''] * batch_size, dtype=object).reshape(-1, 1)),
+            _input("text", np.array([text] * batch_size, dtype=object).reshape(-1, 1)),
             _input("max_output_len", np.array([[max_output_len]]*batch_size, dtype=np.int32))
         ]
         start_time = time.time()
         client.start_stream(callback=partial(stream_callback, result_queue))
         client.async_stream_infer(model_name, inputs)
-    tokenizer = AutoTokenizer.from_pretrained(tokenizer_path)
 
     first_token_latency = first_token_time - start_time
     total_duration = end_time - start_time
@@ -72,6 +82,7 @@ parser.add_argument("--model_name", type=str, default='llama-2-70b-chat-hf-ft-st
 parser.add_argument("--tokenizer_path", type=str, default='/models/triton/llama-2-70b-chat-hf-ft-streaming_tokenizer/1/')
 parser.add_argument("--batch_size", type=int, default=1)
 parser.add_argument("--max_output_len", type=int, default=32)
+parser.add_argument("--input_len", type=int, default=1)
 
 # Parse the command-line arguments
 args = parser.parse_args()
@@ -79,4 +90,5 @@ args = parser.parse_args()
 benchmark_triton(model_name=args.model_name,
                  tokenizer_path=args.tokenizer_path,
                  max_output_len=args.max_output_len,
+                 input_len=args.input_len,
                  batch_size=args.batch_size)
