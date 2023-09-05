@@ -45,6 +45,7 @@ def benchmark_triton(
     max_output_len,
     batch_size,
     input_len,
+    streaming,
     addr = "localhost:8001"
     ):
     tokenizer = AutoTokenizer.from_pretrained(tokenizer_path)
@@ -54,26 +55,38 @@ def benchmark_triton(
         tokens = tokenizer(long_sentence)['input_ids'][:input_len]
         text = tokenizer.decode(tokens)
         print('input token len: ', len(tokens))
+    inputs = [
+        _input("text", np.array([text] * batch_size, dtype=object).reshape(-1, 1)),
+        _input("max_output_len", np.array([[max_output_len]]*batch_size, dtype=np.int32))
+    ]
+    if streaming:
+        with grpcclient.InferenceServerClient(addr, verbose=False) as client:
+            result_queue = mp.Queue()
+            start_time = time.time()
+            client.start_stream(callback=partial(stream_callback, result_queue))
+            client.async_stream_infer(model_name, inputs)
+
+        first_token_latency = first_token_time - start_time
+        total_duration = end_time - start_time
+        streaming_duration = end_time - first_token_time
+        tokens = 0
+        for i in output:
+            tokens += len(tokenizer.encode(i[0].decode())) - 1 # get rid of the start token.
+
+        print('\nfirst_token_latency: ', first_token_latency)
+        print('total duration', total_duration)
+        print('total tokens generated: ', tokens, 'throughput', tokens/streaming_duration)
+        return
+
     with grpcclient.InferenceServerClient(addr, verbose=False) as client:
-        result_queue = mp.Queue()
-        inputs = [
-            _input("text", np.array([text] * batch_size, dtype=object).reshape(-1, 1)),
-            _input("max_output_len", np.array([[max_output_len]]*batch_size, dtype=np.int32))
-        ]
+        outputs = [grpcclient.InferRequestedOutput("output")]
         start_time = time.time()
-        client.start_stream(callback=partial(stream_callback, result_queue))
-        client.async_stream_infer(model_name, inputs)
-
-    first_token_latency = first_token_time - start_time
-    total_duration = end_time - start_time
-    streaming_duration = end_time - first_token_time
-    tokens = 0
-    for i in output:
-        tokens += len(tokenizer.encode(i[0].decode())) - 1 # get rid of the start token.
-
-    print('\nfirst_token_latency: ', first_token_latency)
-    print('total duration', total_duration)
-    print('total tokens generated: ', tokens, 'throughput', tokens/streaming_duration)
+        response = client.infer(model_name, inputs, outputs=outputs)
+        end_time = time.time()
+        outputs = response.as_numpy("output")
+        tokens = tokenizer.encode(outputs[0][0].decode())
+        print('output_tokens:', len(tokens))
+        print('total latency: ', end_time-start_time)
 
 parser = argparse.ArgumentParser(description="Benchmark")
 
@@ -83,6 +96,7 @@ parser.add_argument("--tokenizer_path", type=str, default='/models/triton/llama-
 parser.add_argument("--batch_size", type=int, default=1)
 parser.add_argument("--max_output_len", type=int, default=32)
 parser.add_argument("--input_len", type=int, default=1)
+parser.add_argument("--streaming", action='store_true', default=False, help="Whether or not to stream")
 
 # Parse the command-line arguments
 args = parser.parse_args()
@@ -91,4 +105,5 @@ benchmark_triton(model_name=args.model_name,
                  tokenizer_path=args.tokenizer_path,
                  max_output_len=args.max_output_len,
                  input_len=args.input_len,
-                 batch_size=args.batch_size)
+                 batch_size=args.batch_size,
+                 streaming=args.streaming)
