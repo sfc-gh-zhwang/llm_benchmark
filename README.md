@@ -1,4 +1,4 @@
-# llm_benchmark
+# llm_benchmark on llama2-70B
 
 Run on A100(40GiB)x8, with tensor para = 8.
 
