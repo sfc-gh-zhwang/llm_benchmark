@@ -80,14 +80,6 @@ def benchmark_vllm(
     print('done warm up')
  
     sampling_params = SamplingParams(
-            n=1,
-            temperature=0.0,
-            top_p=1.0,
-            use_beam_search=False,
-            ignore_eos=True,
-            max_tokens=max_output_len,
-        )
-    sampling_params = SamplingParams(
             max_tokens=max_output_len,
         )
     start = time.time()
