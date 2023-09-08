@@ -13,6 +13,7 @@ long_sentence = "A path from a point approximately 330 metres east of the most s
 words = long_sentence.split(' ')
 num_words = len(words)
 
+
 # generate a random sentence with token number = token_num
 def generate_input(tokenizer, token_num):
     if token_num <= 1:
@@ -29,6 +30,13 @@ def generate_input(tokenizer, token_num):
     sentence = tokenizer.decode(tokens, skip_special_tokens=True)
     print(f'generated a random sentence with {token_num} tokens, first 32 charactors are {sentence[:32]}')
     return sentence
+
+
+def generate_inputs(tokenizer, token_num, batch_size):
+    # make the rng deterministic
+    random.seed(42)
+    return [generate_input(tokenizer, token_num) for _ in range(batch_size)]
+
 
 def warmup(llm):
     for i in range(10):
@@ -67,8 +75,7 @@ def benchmark_vllm(
     warmup(llm)
     print('done warm up')
 
-    # To make sure the rng is deterministic
-    random.seed(42)
+    inputs = generate_inputs(tokenizer, input_len, batch_size)
     # Add the requests to the engine.
     for i in range(batch_size):
         sampling_params = SamplingParams(
@@ -81,7 +88,7 @@ def benchmark_vllm(
         )
         # FIXME(woosuk): Do not use internal method.
         llm._add_request(
-            prompt=generate_input(tokenizer=tokenizer, token_num=input_len),
+            prompt=inputs[i],
             prompt_token_ids=None,
             sampling_params=sampling_params,
         )

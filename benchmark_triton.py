@@ -16,6 +16,7 @@ long_sentence = "A path from a point approximately 330 metres east of the most s
 words = long_sentence.split(' ')
 num_words = len(words)
 
+
 # generate a random sentence with token number = token_num
 def generate_input(tokenizer, token_num):
     if token_num <= 1:
@@ -34,6 +35,12 @@ def generate_input(tokenizer, token_num):
     return sentence
 
 
+def generate_inputs(tokenizer, token_num, batch_size):
+    # make the rng deterministic
+    random.seed(42)
+    return [generate_input(tokenizer, token_num) for _ in range(batch_size)]
+
+
 def _input(name: str, data: np.ndarray) -> grpcclient.InferInput:
     t = grpcclient.InferInput(name, data.shape, np_to_triton_dtype(data.dtype))
     t.set_data_from_numpy(data)
@@ -45,6 +52,7 @@ first_token_time = None
 end_time = None
 output = None
 printed = ''
+
 
 def stream_callback(a, result, error):
     # print('stream_callback')
@@ -60,7 +68,7 @@ def stream_callback(a, result, error):
     output = result.as_numpy('output')
     decoded = output[0][0].decode()
     print(decoded[len(printed):], end='')
-    printed=decoded
+    printed = decoded
 
 
 def benchmark_triton(
@@ -70,17 +78,11 @@ def benchmark_triton(
     batch_size,
     input_len,
     streaming,
-    addr = "localhost:8001"
-    ):
+    addr="localhost:8001",
+        ):
     tokenizer = AutoTokenizer.from_pretrained(tokenizer_path)
-    if input_len == 1:
-        text = ''
-    else:
-        tokens = tokenizer(long_sentence)['input_ids'][:input_len]
-        text = tokenizer.decode(tokens)
-        print('input token len: ', len(tokens))
     inputs = [
-        _input("text", np.array([text] * batch_size, dtype=object).reshape(-1, 1)),
+        _input("text", np.array(generate_inputs(tokenizer, input_len, batch_size), dtype=object).reshape(-1, 1)),
         _input("max_output_len", np.array([[max_output_len]]*batch_size, dtype=np.int32))
     ]
     if streaming:
