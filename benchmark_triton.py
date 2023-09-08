@@ -47,6 +47,17 @@ def _input(name: str, data: np.ndarray) -> grpcclient.InferInput:
     return t
 
 
+def warmup(model_name, client):
+    batch_size = 10
+    inputs = [
+        _input("text", np.array(['hello world, this is to warm up']*batch_size,
+                                dtype=object).reshape(-1, 1)),
+        _input("max_output_len", np.array([[32]]*batch_size, dtype=np.int32))
+    ]
+    outputs = [grpcclient.InferRequestedOutput("output")]
+    client.infer(model_name, inputs, outputs=outputs)
+
+
 start_time = None
 first_token_time = None
 end_time = None
@@ -81,8 +92,9 @@ def benchmark_triton(
     addr="localhost:8001",
         ):
     tokenizer = AutoTokenizer.from_pretrained(tokenizer_path)
+    prompts = generate_inputs(tokenizer, input_len, batch_size)
     inputs = [
-        _input("text", np.array(generate_inputs(tokenizer, input_len, batch_size), dtype=object).reshape(-1, 1)),
+        _input("text", np.array(prompts, dtype=object).reshape(-1, 1)),
         _input("max_output_len", np.array([[max_output_len]]*batch_size, dtype=np.int32))
     ]
     if streaming:
@@ -105,11 +117,20 @@ def benchmark_triton(
         return
 
     with grpcclient.InferenceServerClient(addr, verbose=False) as client:
+        print('warm up')
+        warmup(model_name, client)
+        print('done warm up')
         outputs = [grpcclient.InferRequestedOutput("output")]
         start_time = time.time()
         response = client.infer(model_name, inputs, outputs=outputs)
         end_time = time.time()
         outputs = response.as_numpy("output")
+        for prompt, output in zip(prompts, outputs):
+            generated_text = output[0].decode()
+            # Print the output to compare with each framework
+            # print(f"Prompt: {prompt[:16]}, Generated text: {generated_text[:16]}..{generated_text[-16:]}")
+            print(f"Generated text: {generated_text[:32]}..{generated_text[-32:]}")
+            # print(f"Prompt: {prompt}, Generated text: {generated_text}")
         tokens = tokenizer.encode(outputs[0][0].decode())
         print('output_tokens:', len(tokens))
         print('total latency: ', end_time-start_time)
@@ -126,6 +147,11 @@ parser.add_argument("--streaming", action='store_true', default=False, help="Whe
 
 # Parse the command-line arguments
 args = parser.parse_args()
+
+print('\n=============== Argument ===============')
+for key in vars(args):
+    print('{}: {}'.format(key, vars(args)[key]))
+print('========================================')
 
 benchmark_triton(model_name=args.model_name,
                  tokenizer_path=args.tokenizer_path,
