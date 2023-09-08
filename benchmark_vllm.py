@@ -1,7 +1,7 @@
 # Modify from https://github.com/vllm-project/vllm/blob/852ef5b4f5481ce526c804ea234d1de0df91f48d/benchmarks/benchmark_throughput.py
 import argparse
-import time
 import random
+import time
 
 from transformers import AutoTokenizer
 from vllm import LLM, SamplingParams
@@ -12,6 +12,23 @@ long_sentence = "A path from a point approximately 330 metres east of the most s
 
 words = long_sentence.split(' ')
 num_words = len(words)
+
+# generate a random sentence with token number = token_num
+def generate_input(tokenizer, token_num):
+    if token_num <= 1:
+        return ''
+    sentence = ''
+    for i in range(token_num * 3):
+        word_index = random.randint(0, num_words-1)
+        word = words[word_index]
+        if sentence == '':
+            sentence = word
+        else:
+            sentence += ' ' + word
+    tokens = tokenizer(sentence)['input_ids'][:token_num]
+    sentence = tokenizer.decode(tokens, skip_special_tokens=True)
+    print(f'generated a random sentence with {token_num} tokens, first 32 charactors are {sentence[:32]}')
+    return sentence
 
 def warmup(llm):
     for i in range(10):
@@ -32,21 +49,6 @@ def warmup(llm):
 
     llm._run_engine(use_tqdm=True)
 
-
-# generate a random sentence with token number = token_num
-def generate_input(tokenizer, token_num):
-    if token_num <= 1:
-        return ''
-    sentence = ''
-    for i in range(token_num * 3):
-        word_index = random.randint(0, num_words-1)
-        word = words[word_index]
-        if sentence == '':
-            sentence = word
-        else:
-            sentence += ' ' + word
-    tokens = tokenizer(sentence)['input_ids'][:token_num]
-    return tokenizer.decode(tokens, skip_special_tokens=True)
 
 
 def benchmark_vllm(
