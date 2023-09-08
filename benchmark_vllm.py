@@ -120,6 +120,8 @@ parser.add_argument("--streaming", action='store_true', default=False, help="Whe
 
 args = parser.parse_args()
 
+print(args)
+
 benchmark_vllm(model_path=args.model_path,
                max_output_len=args.max_output_len,
                batch_size=args.batch_size,
