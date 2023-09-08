@@ -46,7 +46,7 @@ def warmup(llm):
             top_p=1.0,
             use_beam_search=False,
             ignore_eos=True,
-            max_tokens=32,
+            max_tokens=256,
         )
         # FIXME(woosuk): Do not use internal method.
         llm._add_request(
@@ -71,7 +71,7 @@ def benchmark_vllm(
               tokenizer=model_path,
               tensor_parallel_size=8,
               max_num_seqs=args.batch_size,
-              max_num_batched_tokens=batch_size * (input_len+max_output_len)
+              max_num_batched_tokens=batch_size * (input_len+max_output_len+32)
               )
     print('done init llm')
 
@@ -85,6 +85,9 @@ def benchmark_vllm(
             top_p=1.0,
             use_beam_search=False,
             ignore_eos=True,
+            max_tokens=max_output_len,
+        )
+    sampling_params = SamplingParams(
             max_tokens=max_output_len,
         )
     start = time.time()
