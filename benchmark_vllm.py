@@ -10,6 +10,26 @@ long_sentence = "A path from a point approximately 330 metres east of the most s
     "most southerly corner of Unit 2 Foundry Industrial Estate, Victoria Street and approximately 533 metres east of the most south-easterly corner of 17 Batherton Close, then proceeding in a generally east-north-easterly direction for approximately 240 metres to a point approximately 606 metres east of the most northerly corner of Unit 4 Foundry Industrial Estate, Victoria Street and approximately 23 metres south of the most south westerly corner of the boundary fencing of the scrap metal yard on the south side of Cornubia Road, Widnes, then proceeding in a generally northern direction for approximately 44 metres to a point approximately 3 metres west-north-west of the most north westerly corner of the boundary fence of the scrap metal yard on the south side of Cornubia Road and approximately 47 metres west-south-west of the stub end of Cornubia Road."
 
 
+def warmup(llm):
+    for i in range(10):
+        sampling_params = SamplingParams(
+            n=1,
+            temperature=1.0,
+            top_p=1.0,
+            use_beam_search=False,
+            ignore_eos=True,
+            max_tokens=32,
+        )
+        # FIXME(woosuk): Do not use internal method.
+        llm._add_request(
+            prompt='hello world, this is to warm up',
+            prompt_token_ids=None,
+            sampling_params=sampling_params,
+        )
+
+    llm._run_engine(use_tqdm=True)
+
+
 def benchmark_vllm(
     model_path,
     max_output_len,
@@ -21,6 +41,10 @@ def benchmark_vllm(
     llm = LLM(model=model_path,
               tensor_parallel_size=8)
     print('done init llm')
+
+    print('warm up')
+    warmup(llm)
+    print('done warm up')
 
     if input_len == 1:
         input = ''
@@ -64,7 +88,6 @@ parser.add_argument("--model_path", type=str, default='/models/llama2-70B-hf')
 parser.add_argument("--batch_size", type=int, default=1)
 parser.add_argument("--max_output_len", type=int, default=32)
 parser.add_argument("--input_len", type=int, default=1)
-parser.add_argument("--use_cache", action='store_false', default=True, help="Whether or not to use cache")
 parser.add_argument("--streaming", action='store_true', default=False, help="Whether or not to stream")
 
 args = parser.parse_args()
