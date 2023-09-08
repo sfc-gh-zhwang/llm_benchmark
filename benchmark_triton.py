@@ -1,11 +1,13 @@
-import numpy as np
-import tritonclient.grpc as grpcclient
-from tritonclient.utils import *
+import argparse
 import multiprocessing as mp
-from transformers import AutoTokenizer
 import time
 from functools import partial
-import argparse
+
+import numpy as np
+import tritonclient.grpc as grpcclient
+from transformers import AutoTokenizer
+from tritonclient.utils import *
+
 
 def _input(name: str, data: np.ndarray) -> grpcclient.InferInput:
     t = grpcclient.InferInput(name, data.shape, np_to_triton_dtype(data.dtype))
