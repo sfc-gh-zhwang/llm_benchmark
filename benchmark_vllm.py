@@ -71,7 +71,7 @@ def benchmark_vllm(
               tokenizer=model_path,
               tensor_parallel_size=8,
               max_num_seqs=args.batch_size,
-              max_num_batched_tokens=batch_size * (input_len+max_output_len+32)
+              max_num_batched_tokens=batch_size * (input_len+max_output_len+128)
               )
     print('done init llm')
 
