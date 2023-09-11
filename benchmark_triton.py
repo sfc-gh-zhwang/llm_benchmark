@@ -129,7 +129,7 @@ def benchmark_triton(
             generated_text = output[0].decode()
             # Print the output to compare with each framework
             # print(f"Prompt: {prompt[:16]}, Generated text: {generated_text[:16]}..{generated_text[-16:]}")
-            print(f"Generated text: {generated_text[:32]}..{generated_text[-32:]}")
+            print(f"Generated text: {generated_text[:128]}..{generated_text[-32:]}")
             # print(f"Prompt: {prompt}, Generated text: {generated_text}")
         tokens = tokenizer.encode(outputs[0][0].decode())
         print('output_tokens:', len(tokens))
@@ -159,3 +159,5 @@ benchmark_triton(model_name=args.model_name,
                  input_len=args.input_len,
                  batch_size=args.batch_size,
                  streaming=args.streaming)
+
+## python3 b.py --model_name llama-2-70b-hf-ft --input_len 1 --batch_size 1 --max_output_len 2048
