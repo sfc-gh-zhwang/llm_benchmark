@@ -46,7 +46,7 @@ def warmup(llm):
             top_p=1.0,
             use_beam_search=False,
             ignore_eos=True,
-            max_tokens=256,
+            max_tokens=512,
         )
         # FIXME(woosuk): Do not use internal method.
         llm._add_request(
@@ -80,6 +80,10 @@ def benchmark_vllm(
     print('done warm up')
  
     sampling_params = SamplingParams(
+            n=1,
+            temperature=1.0,
+            top_p=1.0,
+            use_beam_search=False,
             max_tokens=max_output_len,
         )
     start = time.time()
