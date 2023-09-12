@@ -95,13 +95,14 @@ def benchmark_vllm(
 
     elapsed_time = end - start
     total_num_tokens = batch_size * max_output_len
-    print(f"Throughput: {total_num_tokens / elapsed_time} tokens/s")
-    print(f"Total latency: {elapsed_time}")
     for output in outputs:
         prompt = output.prompt
         generated_text = output.outputs[0].text
         # Print the output to compare with each framework
         print(f"Prompt: {prompt[:16]}, Generated text: {generated_text[:16]}..{generated_text[-16:]}")
+
+    print(f"Throughput: {total_num_tokens / elapsed_time} tokens/s")
+    print(f"Total latency: {elapsed_time}")
 
 
 parser = argparse.ArgumentParser(description="Benchmark")
