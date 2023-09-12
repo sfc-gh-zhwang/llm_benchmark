@@ -138,7 +138,7 @@ parser = argparse.ArgumentParser(description="Benchmark")
 
 # Add arguments to the parser
 parser.add_argument("--model_name", type=str, default='llama-2-70b-chat-hf-ft-streaming')
-parser.add_argument("--tokenizer_path", type=str, default='/models/triton/llama-2-70b-chat-hf-ft-streaming_tokenizer/1/')
+parser.add_argument("--tokenizer_path", type=str, default='/models/triton/llama-2-70b-hf-ft_tokenizer/1/')
 parser.add_argument("--batch_size", type=int, default=1)
 parser.add_argument("--max_output_len", type=int, default=32)
 parser.add_argument("--input_len", type=int, default=1)
@@ -160,4 +160,4 @@ benchmark_triton(model_name=args.model_name,
                  streaming=args.streaming)
 
 ## python3 b.py --model_name llama-2-70b-hf-ft --input_len 1 --batch_size 1 --max_output_len 2048
-## python3 b.py --model_name llama-2-70b-hf-ft --input_len 1 --batch_size 2 --max_output_len 1024
+## python3 b.py --model_name llama-2-70b-hf-ft --input_len 1024 --max_output_len 1024  --batch_size 32
