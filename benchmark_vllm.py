@@ -82,6 +82,7 @@ def benchmark_vllm(
     sampling_params = SamplingParams(
             n=1,
             temperature=1.0,
+            top_k=50,
             top_p=1.0,
             use_beam_search=False,
             max_tokens=max_output_len,
