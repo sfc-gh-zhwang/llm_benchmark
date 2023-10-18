@@ -76,8 +76,7 @@ def benchmark_triton(
         ):
     tokenizer = AutoTokenizer.from_pretrained(tokenizer_path)
     prompts = generate_inputs(tokenizer, input_len, batch_size)
-    print(prompts)
-    exit()
+    print(prompts[0])
     inputs = [
         _input("text", np.array(prompts, dtype=object).reshape(-1, 1)),
         _input("max_output_len", np.array([[max_output_len]]*batch_size, dtype=np.int32)),
