@@ -58,6 +58,7 @@ def benchmark_triton(
     batch_size,
     input_len,
     streaming,
+    n,
     addr="localhost:8001",
         ):
     tokenizer = AutoTokenizer.from_pretrained(tokenizer_path)
@@ -92,9 +93,12 @@ def benchmark_triton(
         warmup(model_name, client)
         print('done warm up')
         outputs = [grpcclient.InferRequestedOutput("output")]
-        start_time = time.time()
-        response = client.infer(model_name, inputs, outputs=outputs)
-        end_time = time.time()
+        latency = []
+        for i in range(n):
+            start_time = time.time()
+            response = client.infer(model_name, inputs, outputs=outputs)
+            end_time = time.time()
+            latency.append(end_time-start_time)
         outputs = response.as_numpy("output")
         for prompt, output in zip(prompts, outputs):
             generated_text = output[0].decode()
@@ -102,7 +106,7 @@ def benchmark_triton(
             print(f"Generated text: {generated_text[:32]}..{generated_text[-32:]}")
         tokens = tokenizer.encode(outputs[0][0].decode())
         print('output_tokens:', len(tokens))
-        print('total latency: ', end_time-start_time)
+        print('total latency: ', latency)
 
 parser = argparse.ArgumentParser(description="Benchmark")
 
@@ -112,6 +116,7 @@ parser.add_argument("--tokenizer_path", type=str, default='/models/triton/llama-
 parser.add_argument("--batch_size", type=int, default=1)
 parser.add_argument("--max_output_len", type=int, default=32)
 parser.add_argument("--input_len", type=int, default=1)
+parser.add_argument("--n", type=int, default=50)
 parser.add_argument("--streaming", action='store_true', default=False, help="Whether or not to stream")
 
 # Parse the command-line arguments
@@ -127,7 +132,8 @@ benchmark_triton(model_name=args.model_name,
                  max_output_len=args.max_output_len,
                  input_len=args.input_len,
                  batch_size=args.batch_size,
-                 streaming=args.streaming)
+                 streaming=args.streaming,
+                 n=args.n)
 
 ## python3 b.py --model_name llama-2-70b-hf-ft --input_len 1 --batch_size 1 --max_output_len 2048
 ## python3 b.py --model_name llama-2-70b-hf-ft --input_len 1024 --max_output_len 1024  --batch_size 32
