@@ -7,7 +7,7 @@ import numpy as np
 import tritonclient.grpc as grpcclient
 from transformers import AutoTokenizer
 from tritonclient.utils import *
-from utils import *
+from utils import calculate_mean, generate_inputs
 
 
 def _input(name: str, data: np.ndarray) -> grpcclient.InferInput:
@@ -106,7 +106,8 @@ def benchmark_triton(
             print(f"Generated text: {generated_text[:32]}..{generated_text[-32:]}")
         tokens = tokenizer.encode(outputs[0][0].decode())
         print('output_tokens:', len(tokens))
-        print('total latency: ', latency)
+        mean, lw, up = calculate_mean(latency)
+        print(f'latency {mean}[{lw},{up}]')
 
 parser = argparse.ArgumentParser(description="Benchmark")
 
