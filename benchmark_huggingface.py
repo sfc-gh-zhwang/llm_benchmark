@@ -100,16 +100,15 @@ def benchmark_huggingface(
     input_len,
     streaming=False):
     tokenizer = AutoTokenizer.from_pretrained(model_path)
-    # model = AutoModelForCausalLM.from_pretrained(model_path,
-    #                                              device_map='auto',
-    #                                              torch_dtype=torch.float16)
-    # print(f'model intialized in {model.device}')
+    model = AutoModelForCausalLM.from_pretrained(model_path,
+                                                 device_map='auto',
+                                                 torch_dtype=torch.float16)
+    print(f'model intialized in {model.device}')
     print('warm up')
-    #warmup(model=model, tokenizer=tokenizer)
+    warmup(model=model, tokenizer=tokenizer)
     print('warm up done')
     print('start benchmarking')
     prompts = generate_inputs(tokenizer, input_len, batch_size)
-    print(prompts)
     start_time = time.time()
     tokens = tokenizer(prompts, return_tensors='pt')
     tokens = tokens.to('cuda')
