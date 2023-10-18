@@ -18,8 +18,6 @@ def generate_input(tokenizer, token_num):
     return sentence
 
 def generate_inputs(tokenizer, token_num, batch_size):
-    # make the rng deterministic
-    random.seed(42)
     return [generate_input(tokenizer, token_num) for _ in range(batch_size)]
 
 
@@ -111,6 +109,7 @@ def benchmark_huggingface(
     print('warm up done')
     print('start benchmarking')
     prompts = generate_inputs(tokenizer, input_len, batch_size)
+    print(prompts)
     start_time = time.time()
     tokens = tokenizer(prompts, return_tensors='pt')
     tokens = tokens.to('cuda')
