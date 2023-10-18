@@ -100,10 +100,10 @@ def benchmark_huggingface(
     input_len,
     streaming=False):
     tokenizer = AutoTokenizer.from_pretrained(model_path)
-    model = AutoModelForCausalLM.from_pretrained(model_path,
-                                                 device_map='auto',
-                                                 torch_dtype=torch.float16)
-    print(f'model intialized in {model.device}')
+    # model = AutoModelForCausalLM.from_pretrained(model_path,
+    #                                              device_map='auto',
+    #                                              torch_dtype=torch.float16)
+    # print(f'model intialized in {model.device}')
     print('warm up')
     #warmup(model=model, tokenizer=tokenizer)
     print('warm up done')
