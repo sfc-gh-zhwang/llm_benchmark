@@ -130,13 +130,13 @@ def benchmark_huggingface(
                                     use_cache=True)
         print('generate done', new_tokens.shape)
         generated_texts = []
+        new_tokens = new_tokens[:, input_len:]
         for t in new_tokens:
             generated_texts.append(tokenizer.decode(t, skip_special_tokens=True))
         print('tokenizer done')
         end_time = time.time()
         print('latency: ', end_time - start_time)
         for prompt, generated_text in zip(prompts, generated_texts):
-            generated_text = generated_text[len(prompt):]
             print(f"Generated text: {generated_text[:32]}..{generated_text[-32:]}")
 
 
