@@ -109,7 +109,7 @@ def benchmark_huggingface(
     print('warm up done')
     print('start benchmarking')
     prompts = generate_inputs(tokenizer, input_len, batch_size)
-    print(prompts)
+    print(prompts[0])
     start_time = time.time()
     tokens = tokenizer(prompts, return_tensors='pt')
     tokens = tokens.to('cuda')
