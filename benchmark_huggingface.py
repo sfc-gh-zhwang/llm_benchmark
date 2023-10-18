@@ -1,25 +1,10 @@
 import argparse
-import random
 import time
 from typing import List, Optional
 
 import torch
 from transformers import (AutoModelForCausalLM, AutoTokenizer,
                           TextIteratorStreamer)
-
-def generate_input(tokenizer, token_num):
-    if token_num <= 1:
-        return ''
-    with open('prompts/climate-6640.txt', 'r') as file:
-        # Read the entire file content into a string
-        sentence = file.read()
-    tokens = tokenizer(sentence)['input_ids'][:token_num]
-    sentence = tokenizer.decode(tokens, skip_special_tokens=True)
-    return sentence
-
-def generate_inputs(tokenizer, token_num, batch_size):
-    return [generate_input(tokenizer, token_num) for _ in range(batch_size)]
-
 
 
 class BatchTextIteratorStreamer(TextIteratorStreamer):

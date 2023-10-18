@@ -1,6 +1,5 @@
 import argparse
 import multiprocessing as mp
-import random
 import time
 from functools import partial
 
@@ -8,20 +7,7 @@ import numpy as np
 import tritonclient.grpc as grpcclient
 from transformers import AutoTokenizer
 from tritonclient.utils import *
-
-def generate_input(tokenizer, token_num):
-    if token_num <= 1:
-        return ''
-    with open('prompts/climate-6640.txt', 'r') as file:
-        # Read the entire file content into a string
-        sentence = file.read()
-    tokens = tokenizer(sentence)['input_ids'][:token_num]
-    sentence = tokenizer.decode(tokens, skip_special_tokens=True)
-    return sentence
-
-
-def generate_inputs(tokenizer, token_num, batch_size):
-    return [generate_input(tokenizer, token_num) for _ in range(batch_size)]
+from utils import *
 
 
 def _input(name: str, data: np.ndarray) -> grpcclient.InferInput:
