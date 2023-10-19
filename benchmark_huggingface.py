@@ -1,10 +1,12 @@
 import argparse
 import time
 from typing import List, Optional
-
+from tqdm import tqdm
 import torch
 from transformers import (AutoModelForCausalLM, AutoTokenizer,
                           TextIteratorStreamer)
+
+from utils import calculate_mean, generate_inputs
 
 
 class BatchTextIteratorStreamer(TextIteratorStreamer):
@@ -83,7 +85,8 @@ def benchmark_huggingface(
     max_output_len,
     batch_size,
     input_len,
-    streaming=False):
+    streaming,
+    n):
     tokenizer = AutoTokenizer.from_pretrained(model_path)
     model = AutoModelForCausalLM.from_pretrained(model_path,
                                                  device_map='auto',
@@ -110,18 +113,22 @@ def benchmark_huggingface(
         print('total tokens generated: ', streamer.tokens, 'throughput',
               streamer.tokens/streaming_duration)
     else:
-        new_tokens = model.generate(**tokens, max_new_tokens=max_output_len,
-                                    use_cache=True)
-        print('generate done', new_tokens.shape)
-        generated_texts = []
-        new_tokens = new_tokens[:, input_len:]
-        for t in new_tokens:
-            generated_texts.append(tokenizer.decode(t, skip_special_tokens=True))
-        print('tokenizer done')
-        end_time = time.time()
-        print('latency: ', end_time - start_time)
-        for prompt, generated_text in zip(prompts, generated_texts):
-            print(f"Generated text: {generated_text[:32]}..{generated_text[-32:]}")
+        latency = []
+        for i in tqdm(range(n)):
+            start_time = time.time()
+            tokens = tokenizer(prompts, return_tensors='pt')
+            tokens = tokens.to('cuda')
+            new_tokens = model.generate(**tokens, max_new_tokens=max_output_len,
+                                        use_cache=True)
+            new_tokens = new_tokens[:, input_len:]
+            for t in new_tokens:
+                generated_text = tokenizer.decode(t, skip_special_tokens=True)
+            end_time = time.time()
+            latency.append(end_time-start_time)
+        tokens = tokenizer.encode(generated_text)
+        print('output_tokens:', len(tokens))
+        mean, lb, up = calculate_mean(latency)
+        print(f'latency: {mean:.4f}[{lb:.4f}, {up:.4f}]')
 
 
 parser = argparse.ArgumentParser(description="Benchmark")
@@ -133,6 +140,7 @@ parser.add_argument("--max_output_len", type=int, default=32)
 parser.add_argument("--input_len", type=int, default=1)
 parser.add_argument("--use_cache", action='store_false', default=True, help="Whether or not to use cache")
 parser.add_argument("--streaming", action='store_true', default=False, help="Whether or not to stream")
+parser.add_argument("--n", type=int, default=50)
 
 # Parse the command-line arguments
 args = parser.parse_args()
@@ -146,4 +154,5 @@ benchmark_huggingface(model_path=args.model_path,
                       max_output_len=args.max_output_len,
                       batch_size=args.batch_size,
                       input_len=args.input_len,
-                      streaming=args.streaming)
+                      streaming=args.streaming,
+                      n=args.n)

@@ -2,12 +2,13 @@ import argparse
 import multiprocessing as mp
 import time
 from functools import partial
-from tqdm import tqdm
 
 import numpy as np
 import tritonclient.grpc as grpcclient
+from tqdm import tqdm
 from transformers import AutoTokenizer
 from tritonclient.utils import *
+
 from utils import calculate_mean, generate_inputs
 
 
