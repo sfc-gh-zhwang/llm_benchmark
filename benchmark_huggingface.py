@@ -102,7 +102,7 @@ def benchmark_huggingface(
         for i in tqdm(range(n)):
             start_time = time.time()
             tokens = tokenizer(prompts, return_tensors='pt')
-            tokens = tokens.to('cuda')
+            tokens = tokens.to(model.device)
             streamer = BatchTextIteratorStreamer(batch_size=batch_size, tokenizer=tokenizer, skip_prompt=True)
             model.generate(**tokens, streamer=streamer,
                            max_new_tokens=max_output_len,
