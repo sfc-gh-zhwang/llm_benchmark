@@ -111,29 +111,31 @@ def benchmark_huggingface(
         print('total duration', end_time - start_time)
         print('total tokens generated: ', streamer.tokens, 'throughput',
               streamer.tokens/streaming_duration)
-    else:
-        latency = []
-        print('warming up')
+        return
+
+    # Non-streaming
+    latency = []
+    print('warming up')
+    tokens = tokenizer(prompts, return_tensors='pt')
+    tokens = tokens.to('cuda')
+    new_tokens = model.generate(**tokens, max_new_tokens=max_output_len)
+    print('done warm up')
+    for i in tqdm(range(n)):
+        start_time = time.time()
         tokens = tokenizer(prompts, return_tensors='pt')
         tokens = tokens.to('cuda')
-        new_tokens = model.generate(**tokens, max_new_tokens=max_output_len)
-        print('done warm up')
-        for i in tqdm(range(n)):
-            start_time = time.time()
-            tokens = tokenizer(prompts, return_tensors='pt')
-            tokens = tokens.to('cuda')
-            new_tokens = model.generate(**tokens, max_new_tokens=max_output_len,
-                                        use_cache=True)
-            new_tokens = new_tokens[:, input_len:]
-            for t in new_tokens:
-                generated_text = tokenizer.decode(t, skip_special_tokens=True)
-            end_time = time.time()
-            latency.append(end_time-start_time)
-        tokens = tokenizer.encode(generated_text)
-        print('output_tokens:', len(tokens))
-        print(f"Generated text: {generated_text[:32]}..{generated_text[-32:]}")
-        mean, lb, up = calculate_mean(latency)
-        print(f'latency: {mean:.4f}[{lb:.4f}, {up:.4f}]')
+        new_tokens = model.generate(**tokens, max_new_tokens=max_output_len,
+                                    use_cache=True)
+        new_tokens = new_tokens[:, input_len:]
+        for t in new_tokens:
+            generated_text = tokenizer.decode(t, skip_special_tokens=True)
+        end_time = time.time()
+        latency.append(end_time-start_time)
+    tokens = tokenizer.encode(generated_text)
+    print('output_tokens:', len(tokens))
+    print(f"Generated text: {generated_text[:32]}..{generated_text[-32:]}")
+    mean, lb, up = calculate_mean(latency)
+    print(f'latency: {mean:.4f}[{lb:.4f}, {up:.4f}]')
 
 
 parser = argparse.ArgumentParser(description="Benchmark")
