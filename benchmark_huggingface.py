@@ -98,19 +98,24 @@ def benchmark_huggingface(
     prompts = generate_inputs(tokenizer, input_len, batch_size)
     print(f"Prompt: {prompts[0][:32]}..{prompts[0][-32:]}")
     if streaming:
-        start_time = time.time()
-        tokens = tokenizer(prompts, return_tensors='pt')
-        tokens = tokens.to('cuda')
-        streamer = BatchTextIteratorStreamer(batch_size=batch_size, tokenizer=tokenizer, skip_prompt=True)
-        model.generate(**tokens, streamer=streamer,
-                       max_new_tokens=max_output_len,
-                       use_cache=True)
-        end_time = time.time()
-        streaming_duration = end_time - streamer.first_token_time
-        print('\nfirst_token_latency: ', streamer.first_token_time-start_time)
-        print('total duration', end_time - start_time)
-        print('total tokens generated: ', streamer.tokens, 'throughput',
-              streamer.tokens/streaming_duration)
+        first_token_latency = [0]*n
+        throughput = [0]*n
+        latency = [0]*n
+        for i in tqdm(range(n)):
+            start_time = time.time()
+            tokens = tokenizer(prompts, return_tensors='pt')
+            tokens = tokens.to('cuda')
+            streamer = BatchTextIteratorStreamer(batch_size=batch_size, tokenizer=tokenizer, skip_prompt=True)
+            model.generate(**tokens, streamer=streamer,
+                           max_new_tokens=max_output_len,
+                           use_cache=True)
+            end_time = time.time()
+            latency[i] = end_time - start_time
+            first_token_latency[i] = streamer.first_token_time - start_time
+            throughput[i] = (input_len * batch_size + streamer.tokens)/latency[i]
+        print('first_token_latency: ', calculate_mean(first_token_latency), first_token_latency)
+        print('latency', calculate_mean(latency))
+        print('throughput: ', calculate_mean(throughput))
         return
 
     # Non-streaming
