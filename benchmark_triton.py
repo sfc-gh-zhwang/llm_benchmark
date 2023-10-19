@@ -100,7 +100,7 @@ def benchmark_triton(
         if True:
             start_time = time.time()
             response = client.infer(model_name, inputs, outputs=[grpcclient.InferRequestedOutput("output")])
-            print('response: ', response)
+            print('response: ', response.as_numpy("output"))
             end_time = time.time()
             # latency[i] = end_time-start_time
         outputs = response.as_numpy("output")
