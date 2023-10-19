@@ -73,9 +73,6 @@ def benchmark_triton(
     ]
     if streaming:
         with grpcclient.InferenceServerClient(addr, verbose=False) as client:
-            print('warm up')
-            warmup(model_name, client)
-            print('done warm up')
             result_queue = mp.Queue()
             start_time = time.time()
             client.start_stream(callback=partial(stream_callback, result_queue))
