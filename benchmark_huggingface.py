@@ -111,7 +111,7 @@ def benchmark_huggingface(
             latency[i] = end_time - start_time
             first_token_latency[i] = streamer.first_token_time - start_time
             throughput[i] = (input_len * batch_size + streamer.tokens)/latency[i]
-        print('first_token_latency: ', calculate_mean(first_token_latency), first_token_latency)
+        print('first_token_latency: ', calculate_mean(first_token_latency))
         print('latency', calculate_mean(latency))
         print('throughput: ', calculate_mean(throughput))
         return

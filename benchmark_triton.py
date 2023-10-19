@@ -86,7 +86,7 @@ def benchmark_triton(
                 tokens += input_len + len(tokenizer.encode(ot[0].decode())) - 1 # get rid of the start token.
             throughput[i] = tokens/latency[i]
 
-        print('first_token_latency: ', calculate_mean(first_token_latency), first_token_latency)
+        print('first_token_latency: ', calculate_mean(first_token_latency))
         print('latency', calculate_mean(latency))
         print('throughput: ', calculate_mean(throughput))
         return
