@@ -93,9 +93,7 @@ def benchmark_huggingface(
                                                  device_map='auto',
                                                  torch_dtype=torch.float16)
     print(f'model intialized in {model.device}')
-    print('warm up')
-    warmup(model=model, tokenizer=tokenizer)
-    print('warm up done')
+    warmup(model, tokenizer)
     print('start benchmarking')
     prompts = generate_inputs(tokenizer, input_len, batch_size)
     print(prompts[0])
@@ -133,6 +131,7 @@ def benchmark_huggingface(
             latency.append(end_time-start_time)
         tokens = tokenizer.encode(generated_text)
         print('output_tokens:', len(tokens))
+        print(f"Generated text: {generated_text[:32]}..{generated_text[-32:]}")
         mean, lb, up = calculate_mean(latency)
         print(f'latency: {mean:.4f}[{lb:.4f}, {up:.4f}]')
 
