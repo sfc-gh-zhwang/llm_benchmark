@@ -73,7 +73,7 @@ class BatchTextIteratorStreamer(TextIteratorStreamer):
 
 
 def warmup(model, tokenizer):
-    input = ['hello world this is to warm up' * 3]*16
+    input = ['hello world this is to warm up']*16
     tokens = tokenizer(input, return_tensors='pt')
     tokens = tokens.to('cuda')
     model.generate(**tokens, max_new_tokens=64)
@@ -120,7 +120,7 @@ def benchmark_huggingface(
     latency = []
     print('warming up')
     tokens = tokenizer(prompts, return_tensors='pt')
-    tokens = tokens.to('cuda')
+    tokens = tokens.to('auto')
     new_tokens = model.generate(**tokens, max_new_tokens=max_output_len)
     print('done warm up')
     for i in tqdm(range(n)):
