@@ -97,10 +97,10 @@ def benchmark_huggingface(
     print('start benchmarking')
     prompts = generate_inputs(tokenizer, input_len, batch_size)
     print(prompts[0])
-    start_time = time.time()
-    tokens = tokenizer(prompts, return_tensors='pt')
-    tokens = tokens.to('cuda')
     if streaming:
+        start_time = time.time()
+        tokens = tokenizer(prompts, return_tensors='pt')
+        tokens = tokens.to('cuda')
         streamer = BatchTextIteratorStreamer(batch_size=batch_size, tokenizer=tokenizer, skip_prompt=True)
         model.generate(**tokens, streamer=streamer,
                        max_new_tokens=max_output_len,
