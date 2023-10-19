@@ -36,4 +36,5 @@ def calculate_mean(data, confidence_level=0.95):
     # Calculate the confidence interval
     lb = mean - margin_of_error
     up = mean + margin_of_error
-    return mean, lb, up, f'{mean:.4f}[{lb:.4f}, {up:.4f}]'
+    # return mean, lb, up, f'{mean:.4f}[{lb:.4f}, {up:.4f}]'
+    return f'{mean:.4f}[{lb:.4f}, {up:.4f}]'

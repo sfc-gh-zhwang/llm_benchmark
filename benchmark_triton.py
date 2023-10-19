@@ -83,15 +83,13 @@ def benchmark_triton(
             latency[i] = end_time - start_time
             tokens = 0
             for ot in output:
-                print(input_len)
-                print(tokenizer.encode(ot[0].decode()))
                 tokens += input_len + len(tokenizer.encode(ot[0].decode())) - 1 # get rid of the start token.
             print(tokens)
             throughput[i] = tokens/latency[i]
 
-        print('\nfirst_token_latency: ', first_token_latency)
-        print('total duration', total_duration)
-        print('total tokens generated: ', tokens, 'throughput', tokens/streaming_duration)
+        print('first_token_latency: ', calculate_mean(first_token_latency))
+        print('latency', calculate_mean(latency))
+        print('throughput: ', calculate_mean(throughput))
         return
 
     with grpcclient.InferenceServerClient(addr, verbose=False) as client:
