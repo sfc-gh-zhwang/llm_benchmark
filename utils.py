@@ -18,7 +18,21 @@ def generate_inputs(tokenizer, token_num, batch_size):
 
 
 def calculate_mean(data):
+    # Confidence level (e.g., 95%)
+    confidence_level = 0.95
+
     # Calculate the sample statistics
     sample_mean = np.mean(data)
     sample_std = np.std(data, ddof=1)  # ddof=1 for sample standard deviation
-    return sample_mean, sample_std/sample_mean*100.
+    sample_size = len(data)
+
+    # Calculate the critical value from the t-distribution (two-tailed)
+    t_critical = stats.t.ppf((1 + confidence_level) / 2, df=sample_size - 1)
+
+    # Calculate the margin of error
+    margin_of_error = t_critical * (sample_std / np.sqrt(sample_size))
+
+    # Calculate the confidence interval
+    lower_bound = sample_mean - margin_of_error
+    upper_bound = sample_mean + margin_of_error
+    return sample_mean, lower_bound, upper_bound
