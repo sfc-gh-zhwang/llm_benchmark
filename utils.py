@@ -19,9 +19,13 @@ def generate_inputs(tokenizer, token_num, batch_size):
 
 def calculate_mean(data, confidence_level=0.95):
     # Calculate the sample statistics
+    sample_size = len(data)
+    if sample_size == 0:
+        raise ValueError("input is empty")
+    if sample_size == 1:
+        return data[0], data[0], data[0]
     sample_mean = np.mean(data)
     sample_std = np.std(data, ddof=1)  # ddof=1 for sample standard deviation
-    sample_size = len(data)
 
     # Calculate the critical value from the t-distribution (two-tailed)
     t_critical = stats.t.ppf((1 + confidence_level) / 2, df=sample_size - 1)
