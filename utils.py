@@ -17,10 +17,7 @@ def generate_inputs(tokenizer, token_num, batch_size):
     return [generate_input(tokenizer, token_num) for _ in range(batch_size)]
 
 
-def calculate_mean(data):
-    # Confidence level (e.g., 95%)
-    confidence_level = 0.95
-
+def calculate_mean(data, confidence_level=0.95):
     # Calculate the sample statistics
     sample_mean = np.mean(data)
     sample_std = np.std(data, ddof=1)  # ddof=1 for sample standard deviation
