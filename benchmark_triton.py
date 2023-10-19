@@ -2,6 +2,7 @@ import argparse
 import multiprocessing as mp
 import time
 from functools import partial
+from tqdm import tqdm
 
 import numpy as np
 import tritonclient.grpc as grpcclient
@@ -94,7 +95,7 @@ def benchmark_triton(
         print('done warm up')
         outputs = [grpcclient.InferRequestedOutput("output")]
         latency = []
-        for i in range(n):
+        for i in tqdm(n):
             start_time = time.time()
             response = client.infer(model_name, inputs, outputs=outputs)
             end_time = time.time()
@@ -108,6 +109,7 @@ def benchmark_triton(
         print('output_tokens:', len(tokens))
         mean, lb, up = calculate_mean(latency)
         print(f'latency: {mean:.2f}[{lb:.2f}, {up:.2f}]')
+        print(f'latency: {mean}[{lb}, {up}]')
 
 parser = argparse.ArgumentParser(description="Benchmark")
 
