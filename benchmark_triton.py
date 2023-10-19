@@ -102,7 +102,7 @@ def benchmark_triton(
             response = client.infer(model_name, inputs, outputs=[grpcclient.InferRequestedOutput("output")])
             print('response: ', response)
             end_time = time.time()
-            latency[i] = end_time-start_time
+            # latency[i] = end_time-start_time
         outputs = response.as_numpy("output")
         generated_text = output[0].decode()
         # Print the output to compare with each framework
