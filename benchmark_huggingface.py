@@ -1,8 +1,9 @@
 import argparse
 import time
 from typing import List, Optional
-from tqdm import tqdm
+
 import torch
+from tqdm import tqdm
 from transformers import (AutoModelForCausalLM, AutoTokenizer,
                           TextIteratorStreamer)
 
