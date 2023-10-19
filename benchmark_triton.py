@@ -96,7 +96,8 @@ def benchmark_triton(
         warmup(model_name, client)
         print('done warm up')
         latency = [0]*n
-        for i in tqdm(range(n)):
+        # for i in tqdm(range(n)):
+        if True:
             start_time = time.time()
             response = client.infer(model_name, inputs, outputs=[grpcclient.InferRequestedOutput("output")])
             print('response: ', response)
