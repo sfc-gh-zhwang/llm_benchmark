@@ -68,11 +68,9 @@ def benchmark_triton(
     ]
     if streaming:
         with grpcclient.InferenceServerClient(addr, verbose=False) as client:
-            result_queue = mp.Queue()
             start_time = time.time()
             client.start_stream(callback=partial(stream_callback,))
             client.async_stream_infer(model_name, inputs)
-            print('done')
 
         first_token_latency = first_token_time - start_time
         global end_time
