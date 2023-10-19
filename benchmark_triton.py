@@ -107,8 +107,7 @@ def benchmark_triton(
         print(f"Generated text: {generated_text[:32]}..{generated_text[-32:]}")
         tokens = tokenizer.encode(outputs[0][0].decode())
         print('output_tokens:', len(tokens))
-        _, _, _, latency = calculate_mean(latency)
-        print(f'latency: {latency}')
+        print(f'latency: {calculate_mean(latency)}')
 
 parser = argparse.ArgumentParser(description="Benchmark")
 
