@@ -35,7 +35,7 @@ end_time = None
 output = None
 
 
-def stream_callback(a, result, error):
+def stream_callback(result, error):
     # print('stream_callback')
     global first_token_time
     global end_time
@@ -70,7 +70,7 @@ def benchmark_triton(
         with grpcclient.InferenceServerClient(addr, verbose=False) as client:
             result_queue = mp.Queue()
             start_time = time.time()
-            client.start_stream(callback=partial(stream_callback, result_queue))
+            client.start_stream(callback=partial(stream_callback,))
             client.async_stream_infer(model_name, inputs)
             print('done')
 
