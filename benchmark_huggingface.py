@@ -65,7 +65,6 @@ class BatchTextIteratorStreamer(TextIteratorStreamer):
 
         self.next_tokens_are_prompt = True
         self.on_finalized_text(printable_texts, stream_end=True)
-        print(self.tokens)
 
     def on_finalized_text(self, texts: List[str], stream_end: bool = False):
         self.text_queue.put(texts, timeout=self.timeout)
@@ -138,8 +137,7 @@ def benchmark_huggingface(
     tokens = tokenizer.encode(generated_text)
     print('output_tokens:', len(tokens))
     print(f"Generated text: {generated_text[:32]}..{generated_text[-32:]}")
-    mean, lb, up = calculate_mean(latency)
-    print(f'latency: {mean:.4f}[{lb:.4f}, {up:.4f}]')
+    print(f'latency: {calculate_mean(latency)}')
 
 
 parser = argparse.ArgumentParser(description="Benchmark")
