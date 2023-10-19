@@ -96,15 +96,13 @@ def benchmark_triton(
         warmup(model_name, client)
         print('done warm up')
         latency = [0]*n
-        # for i in tqdm(range(n)):
-        if True:
+        for i in tqdm(range(n)):
             start_time = time.time()
             response = client.infer(model_name, inputs, outputs=[grpcclient.InferRequestedOutput("output")])
-            print('response: ', response.as_numpy("output"))
             end_time = time.time()
-            # latency[i] = end_time-start_time
+            latency[i] = end_time-start_time
         outputs = response.as_numpy("output")
-        generated_text = output[0].decode()
+        generated_text = outputs[0].decode()
         # Print the output to compare with each framework
         print(f"Generated text: {generated_text[:32]}..{generated_text[-32:]}")
         tokens = tokenizer.encode(outputs[0][0].decode())
