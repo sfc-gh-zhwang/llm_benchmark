@@ -32,7 +32,6 @@ class BatchTextIteratorStreamer(TextIteratorStreamer):
         self.tokens += self.batch_size
         if self.first_token_time is None:
             self.first_token_time = time.time()
-            print('first token generated')
         for idx in range(self.batch_size):
             self.token_cache[idx].extend(value[idx].tolist())
             text = self.tokenizer.decode(self.token_cache[idx], **self.decode_kwargs)
