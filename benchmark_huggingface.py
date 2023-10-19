@@ -96,7 +96,7 @@ def benchmark_huggingface(
     warmup(model, tokenizer)
     print('start benchmarking')
     prompts = generate_inputs(tokenizer, input_len, batch_size)
-    print(prompts[0])
+    print(f"Prompt: {prompts[0][:32]}..{prompts[0][-32:]}")
     if streaming:
         start_time = time.time()
         tokens = tokenizer(prompts, return_tensors='pt')
