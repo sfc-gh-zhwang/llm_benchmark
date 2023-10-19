@@ -114,6 +114,11 @@ def benchmark_huggingface(
               streamer.tokens/streaming_duration)
     else:
         latency = []
+        print('warming up')
+        tokens = tokenizer(prompts, return_tensors='pt')
+        tokens = tokens.to('cuda')
+        new_tokens = model.generate(**tokens, max_new_tokens=max_output_len)
+        print('done warm up')
         for i in tqdm(range(n)):
             start_time = time.time()
             tokens = tokenizer(prompts, return_tensors='pt')
