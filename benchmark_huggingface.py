@@ -74,7 +74,7 @@ class BatchTextIteratorStreamer(TextIteratorStreamer):
 
 
 def warmup(model, tokenizer):
-    input = ['hello world this is to warm up']*16
+    input = ['hello world this is to warm up' * 3]*16
     tokens = tokenizer(input, return_tensors='pt')
     tokens = tokens.to('cuda')
     model.generate(**tokens, max_new_tokens=64)
