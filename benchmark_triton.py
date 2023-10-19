@@ -33,7 +33,6 @@ start_time = None
 first_token_time = None
 end_time = None
 output = None
-printed = ''
 
 
 def stream_callback(a, result, error):
@@ -41,16 +40,12 @@ def stream_callback(a, result, error):
     global first_token_time
     global end_time
     global output
-    global printed
     if error:
         raise error
     end_time = time.time()
+    output = result.as_numpy('output')
     if first_token_time is None:
         first_token_time = end_time
-    output = result.as_numpy('output')
-    decoded = output[0][0].decode()
-    print(decoded[len(printed):], end='')
-    printed = decoded
 
 
 def benchmark_triton(
@@ -80,6 +75,7 @@ def benchmark_triton(
             print('done')
 
         first_token_latency = first_token_time - start_time
+        global end_time
         total_duration = end_time - start_time
         streaming_duration = end_time - first_token_time
         tokens = 0
