@@ -67,18 +67,25 @@ def benchmark_triton(
         _input("random_seed",  np.array([[0]]*batch_size, dtype=np.uint64))
     ]
     if streaming:
-        with grpcclient.InferenceServerClient(addr, verbose=False) as client:
-            start_time = time.time()
-            client.start_stream(callback=partial(stream_callback,))
-            client.async_stream_infer(model_name, inputs)
+        first_token_latency = [0]*n
+        throughput = [0]*n
+        latency = [0]*n
+        for i in tqdm(range(n)):
+            with grpcclient.InferenceServerClient(addr, verbose=False) as client:
+                global first_token_time
+                first_token_time = None
+                start_time = time.time()
+                client.start_stream(callback=partial(stream_callback,))
+                client.async_stream_infer(model_name, inputs)
 
-        first_token_latency = first_token_time - start_time
-        global end_time
-        total_duration = end_time - start_time
-        streaming_duration = end_time - first_token_time
-        tokens = 0
-        for i in output:
-            tokens += len(tokenizer.encode(i[0].decode())) - 1 # get rid of the start token.
+            global end_time
+            first_token_latency[i] = first_token_time - start_time
+            latency[i] = end_time - start_time
+            tokens = 0
+            for i in output:
+                tokens += input_len + len(tokenizer.encode(i[0].decode())) - 1 # get rid of the start token.
+            print(tokens)
+            throughput[i] = tokens/latency[i]
 
         print('\nfirst_token_latency: ', first_token_latency)
         print('total duration', total_duration)
@@ -90,12 +97,12 @@ def benchmark_triton(
         warmup(model_name, client)
         print('done warm up')
         outputs = [grpcclient.InferRequestedOutput("output")]
-        latency = []
+        latency = [0]*n
         for i in tqdm(range(n)):
             start_time = time.time()
             response = client.infer(model_name, inputs, outputs=outputs)
             end_time = time.time()
-            latency.append(end_time-start_time)
+            latency[i] = end_time-start_time
         outputs = response.as_numpy("output")
         generated_text = output[0].decode()
         # Print the output to compare with each framework
