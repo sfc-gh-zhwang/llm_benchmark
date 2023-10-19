@@ -102,7 +102,7 @@ def benchmark_triton(
             end_time = time.time()
             latency[i] = end_time-start_time
         outputs = response.as_numpy("output")
-        generated_text = outputs[0].decode()
+        generated_text = outputs[0][0].decode()
         # Print the output to compare with each framework
         print(f"Generated text: {generated_text[:32]}..{generated_text[-32:]}")
         tokens = tokenizer.encode(outputs[0][0].decode())
