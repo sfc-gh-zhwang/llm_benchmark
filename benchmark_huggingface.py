@@ -8,7 +8,6 @@ from transformers import (AutoModelForCausalLM, AutoTokenizer,
                           TextIteratorStreamer)
 
 from utils import calculate_mean, generate_inputs
-import deepspeed
 
 class BatchTextIteratorStreamer(TextIteratorStreamer):
     def __init__(self, batch_size: int, tokenizer: "AutoTokenizer", skip_prompt: bool = False, timeout: Optional[float] = None, **decode_kwargs):
@@ -117,8 +116,6 @@ def benchmark_huggingface(
         return
 
     # Non-streaming
-    model = deepspeed.init_inference(
-         model=model, mp_size=4, dtype=torch.float16, replace_method="auto", replace_with_kernel_inject=True)
     latency = []
     print('warming up')
     tokens = tokenizer(prompts, return_tensors='pt')
