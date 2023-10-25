@@ -90,7 +90,7 @@ def benchmark_triton(
             throughput[i] = tokens/latency[i]
 
         print('first_token_latency: ', calculate_mean(first_token_latency))
-        print('avg_output_len: ', output_tokens/n)
+        print('avg_output_len: ', int(output_tokens/n))
         print('latency', calculate_mean(latency))
         print('throughput: ', calculate_mean(throughput))
         return
