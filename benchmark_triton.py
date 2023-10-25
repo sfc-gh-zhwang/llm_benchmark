@@ -70,6 +70,7 @@ def benchmark_triton(
         first_token_latency = [0]*n
         throughput = [0]*n
         latency = [0]*n
+        output_tokens = 0
         for i in tqdm(range(n)):
             with grpcclient.InferenceServerClient(addr, verbose=False) as client:
                 global first_token_time
@@ -82,7 +83,6 @@ def benchmark_triton(
             first_token_latency[i] = first_token_time - start_time
             latency[i] = end_time - start_time
             tokens = 0
-            output_tokens = 0
             for ot in output:
                 output_len = len(tokenizer.encode(ot[0].decode())) - 1
                 output_tokens += output_len
