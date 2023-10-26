@@ -64,7 +64,6 @@ def benchmark_triton(
     inputs = [
         _input("text", np.array(prompts, dtype=object).reshape(-1, 1)),
         _input("max_output_len", np.array([[max_output_len]]*batch_size, dtype=np.int32)),
-        _input("random_seed",  np.array([[0]]*batch_size, dtype=np.uint64))
     ]
     if streaming:
         first_token_latency = [0]*n
