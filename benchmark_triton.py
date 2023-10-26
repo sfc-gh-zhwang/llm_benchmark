@@ -19,7 +19,7 @@ def _input(name: str, data: np.ndarray) -> grpcclient.InferInput:
 
 
 def warmup(model_name, client):
-    batch_size = 10
+    batch_size = 1
     inputs = [
         _input("text", np.array(['hello world, this is to warm up']*batch_size,
                                 dtype=object).reshape(-1, 1)),
