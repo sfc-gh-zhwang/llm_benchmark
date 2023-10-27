@@ -5,7 +5,7 @@ from scipy import stats
 def generate_input(tokenizer, token_num):
     if token_num <= 1:
         return ''
-    with open('prompts/codellama.txt', 'r') as file:
+    with open('prompts/climate-2468.txt', 'r') as file:
         # Read the entire file content into a string
         sentence = file.read()
     tokens = tokenizer(sentence)['input_ids'][:token_num]
