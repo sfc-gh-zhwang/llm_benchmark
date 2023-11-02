@@ -9,6 +9,7 @@ from transformers import (AutoModelForCausalLM, AutoTokenizer,
 
 from utils import calculate_mean, generate_inputs
 
+
 class BatchTextIteratorStreamer(TextIteratorStreamer):
     def __init__(self, batch_size: int, tokenizer: "AutoTokenizer", skip_prompt: bool = False, timeout: Optional[float] = None, **decode_kwargs):
         super().__init__(tokenizer, skip_prompt, timeout, **decode_kwargs)
