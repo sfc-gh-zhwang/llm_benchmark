@@ -29,9 +29,8 @@ def warmup(model_name, client):
     client.infer(model_name, inputs, outputs=outputs)
 
 
-def stream_callback(index, result, error):
+def stream_callback(index, end_time, output, first_token_time, result, error):
     # print('stream_callback')
-    global first_token_time, end_time, output
     if error:
         raise error
     end_time[index] = time.time()
@@ -51,7 +50,7 @@ def start_stream(addr, input_len, tokenizer, model_name, inputs, index,
     with grpcclient.InferenceServerClient(addr, verbose=False) as client:
         first_token_time[index] = None
         start_time[index] = time.time()
-        client.start_stream(callback=partial(stream_callback, index))
+        client.start_stream(callback=partial(stream_callback, index, end_time, output, first_token_time))
         client.async_stream_infer(model_name, inputs)
 
     first_token_latency[index] = first_token_time[index] - start_time[index]
@@ -107,7 +106,7 @@ def benchmark_triton(
                                                         throughput,
                                                         output,
                                                         start_time,
-                                                        end_time,))
+                                                        end_time))
                     processes.append(process)
                     process.start()
                 for process in processes:
