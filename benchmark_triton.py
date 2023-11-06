@@ -40,24 +40,20 @@ def stream_callback(index, result, error):
         first_token_time[index] = end_time[index]
 
 
-first_token_latency = None
-first_token_time = None
-latency = None
-throughput = None
-output = None
-start_time = None
-output_tokens = None
-end_time = None
-
-
-def start_stream(addr, input_len, tokenizer, model_name, inputs, index):
+def start_stream(addr, input_len, tokenizer, model_name, inputs, index,
+                 first_token_latency,
+                 first_token_time,
+                 latency,
+                 throughput,
+                 output,
+                 start_time,
+                 end_time):
     with grpcclient.InferenceServerClient(addr, verbose=False) as client:
         first_token_time[index] = None
         start_time[index] = time.time()
         client.start_stream(callback=partial(stream_callback, index))
         client.async_stream_infer(model_name, inputs)
 
-    global end_time
     first_token_latency[index] = first_token_time[index] - start_time[index]
     latency[index] = end_time[index] - start_time[index]
     tokens = 0
@@ -87,16 +83,16 @@ def benchmark_triton(
     ]
     if streaming:
         global first_token_latency, first_token_time, latency, throughput, output, start_time, end_time, output_tokens
-        first_token_latency = [0]*n*parallelism
-        first_token_time = [0]*n*parallelism
-        latency = [0]*n*parallelism
-        throughput = [0]*n*parallelism
-        output = [0]*n*parallelism
-        start_time = [0]*n*parallelism
-        end_time = [0]*n*parallelism
         output_tokens = 0
-        for i in tqdm(range(n)):
-            with multiprocessing.Manager():
+        with multiprocessing.Manager() as manager:
+            first_token_latency = manager.list([None]*n*parallelism)
+            first_token_time = manager.list([None]*n*parallelism)
+            latency = manager.list([None]*n*parallelism)
+            throughput = manager.list([None]*n*parallelism)
+            output = manager.list([None]*n*parallelism)
+            start_time = manager.list([None]*n*parallelism)
+            end_time = manager.list([None]*n*parallelism)
+            for i in tqdm(range(n)):
                 processes = []
                 for p in range(parallelism):
                     process = multiprocessing.Process(target=start_stream,
@@ -106,7 +102,14 @@ def benchmark_triton(
                                                         tokenizer,
                                                         model_name,
                                                         inputs,
-                                                        i*parallelism+p))
+                                                        i*parallelism+p,
+                                                        first_token_latency,
+                                                        first_token_time,
+                                                        latency,
+                                                        throughput,
+                                                        output,
+                                                        start_time,
+                                                        end_time,))
                     processes.append(process)
                     process.start()
                 for process in processes:
