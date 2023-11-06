@@ -29,7 +29,7 @@ def warmup(model_name, client):
     client.infer(model_name, inputs, outputs=outputs)
 
 
-def stream_callback(result, error, index):
+def stream_callback(index, result, error):
     print("index:", index)
     # print('stream_callback')
     global first_token_time
