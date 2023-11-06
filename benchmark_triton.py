@@ -37,10 +37,10 @@ def stream_callback(index, result, error):
     global output
     if error:
         raise error
-    end_time = time.time()
-    output = result.as_numpy('output')
-    if first_token_time is None:
-        first_token_time = end_time
+    end_time[index] = time.time()
+    output[index] = result.as_numpy('output')
+    if first_token_time[index] is None:
+        first_token_time[index] = end_time[index]
 
 
 first_token_latency = None
