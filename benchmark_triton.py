@@ -30,7 +30,7 @@ def warmup(model_name, client):
 
 
 def stream_callback(result, error, index):
-    print(index)
+    print("index:", index)
     # print('stream_callback')
     global first_token_time
     global end_time
