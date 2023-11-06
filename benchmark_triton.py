@@ -31,9 +31,7 @@ def warmup(model_name, client):
 
 def stream_callback(index, result, error):
     # print('stream_callback')
-    global first_token_time
-    global end_time
-    global output
+    global first_token_time, end_time, output
     if error:
         raise error
     end_time[index] = time.time()
