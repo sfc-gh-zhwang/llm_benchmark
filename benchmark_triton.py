@@ -99,13 +99,14 @@ def benchmark_triton(
             with multiprocessing.Manager():
                 processes = []
                 for p in range(parallelism):
-                    process = multiprocessing.Process(target=start_stream, args=(
-                        addr,
-                        input_len,
-                        tokenizer,
-                        model_name,
-                        inputs,
-                        i*parallelism+p))
+                    process = multiprocessing.Process(target=start_stream,
+                                                      args=(
+                                                        addr,
+                                                        input_len,
+                                                        tokenizer,
+                                                        model_name,
+                                                        inputs,
+                                                        i*parallelism+p))
                     processes.append(process)
                     process.start()
                 for process in processes:
