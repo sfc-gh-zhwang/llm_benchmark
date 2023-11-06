@@ -82,8 +82,6 @@ def benchmark_triton(
         _input("max_output_len", np.array([[max_output_len]]*batch_size, dtype=np.int32)),
     ]
     if streaming:
-        global first_token_latency, first_token_time, latency, throughput, output, start_time, end_time, output_tokens
-        output_tokens = 0
         with multiprocessing.Manager() as manager:
             first_token_latency = manager.list([None]*n*parallelism)
             first_token_time = manager.list([None]*n*parallelism)
@@ -115,6 +113,11 @@ def benchmark_triton(
                 for process in processes:
                     process.join()
             print('first_token_latency: ', calculate_mean(first_token_latency))
+            output_tokens = 0
+            for one_output in range(output):
+                for ot in one_output:
+                    output_len = len(tokenizer.encode(ot[0].decode())) - 1
+                    output_tokens += input_len + output_len    # get rid of the start token.
             print('avg_output_len: ', int(output_tokens/n))
             print('latency', calculate_mean(latency))
             print('throughput: ', calculate_mean(throughput))
