@@ -35,7 +35,7 @@ end_time = None
 output = None
 
 
-def stream_callback(result, error):
+def stream_callback(result, error, index):
     # print('stream_callback')
     global first_token_time
     global end_time
@@ -48,6 +48,33 @@ def stream_callback(result, error):
         first_token_time = end_time
 
 
+first_token_latency = None
+first_token_time = None
+latency = None
+throughput = None
+output = None
+start_time = None
+output_tokens = None
+end_time = None
+
+def start_stream(addr, model_name, inputs, index):
+    with grpcclient.InferenceServerClient(addr, verbose=False) as client:
+        first_token_time[index] = None
+        start_time = time.time()
+        client.start_stream(callback=partial(stream_callback,))
+        client.async_stream_infer(model_name, inputs)
+
+    global end_time
+    first_token_latency[i] = first_token_time - start_time
+    latency[i] = end_time - start_time
+    tokens = 0
+    for ot in output:
+        output_len = len(tokenizer.encode(ot[0].decode())) - 1
+        output_tokens += output_len
+        tokens += input_len + output_len    # get rid of the start token.
+    throughput[i] = tokens/latency[i]
+
+
 def benchmark_triton(
     model_name,
     tokenizer_path,
@@ -55,6 +82,7 @@ def benchmark_triton(
     batch_size,
     input_len,
     streaming,
+    parallelism,
     n,
     addr="localhost:8001",
         ):
@@ -66,9 +94,13 @@ def benchmark_triton(
         _input("max_output_len", np.array([[max_output_len]]*batch_size, dtype=np.int32)),
     ]
     if streaming:
-        first_token_latency = [0]*n
-        throughput = [0]*n
-        latency = [0]*n
+        first_token_latency = [0]*n*parallelism
+        first_token_time = [0]*n*parallelism
+        latency = [0]*n*parallelism
+        throughput = [0]*n*parallelism
+        output = [0]*n*parallelism
+        start_time = [0]*n*parallelism
+        end_time = [0]*n*parallelism
         output_tokens = 0
         for i in tqdm(range(n)):
             with grpcclient.InferenceServerClient(addr, verbose=False) as client:
@@ -122,6 +154,7 @@ parser.add_argument("--batch_size", type=int, default=1)
 parser.add_argument("--max_output_len", type=int, default=32)
 parser.add_argument("--input_len", type=int, default=1)
 parser.add_argument("--n", type=int, default=50)
+parser.add_argument("--parallelism", type=int, default=1)
 parser.add_argument("--streaming", action='store_true', default=False, help="Whether or not to stream")
 
 # Parse the command-line arguments
@@ -138,6 +171,7 @@ benchmark_triton(model_name=args.model_name,
                  input_len=args.input_len,
                  batch_size=args.batch_size,
                  streaming=args.streaming,
+                 parallelism=args.parallelism,
                  n=args.n)
 
 ## python3 b.py --model_name llama-2-70b-hf-ft --input_len 1 --batch_size 1 --max_output_len 2048
