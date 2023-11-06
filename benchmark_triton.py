@@ -53,7 +53,7 @@ output_tokens = None
 end_time = None
 
 def start_stream(addr, model_name, inputs, index):
-    print("index:", index)
+    print("start_stream index:", index)
     with grpcclient.InferenceServerClient(addr, verbose=False) as client:
         first_token_time[index] = None
         start_time = time.time()
