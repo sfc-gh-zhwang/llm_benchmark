@@ -50,7 +50,11 @@ def start_stream(addr, input_len, tokenizer, model_name, inputs, index,
     with grpcclient.InferenceServerClient(addr, verbose=False) as client:
         first_token_time[index] = None
         start_time[index] = time.time()
-        client.start_stream(callback=partial(stream_callback, index, end_time, output, first_token_time))
+        client.start_stream(callback=partial(stream_callback,
+                                             index,
+                                             end_time,
+                                             output,
+                                             first_token_time))
         client.async_stream_infer(model_name, inputs)
 
     first_token_latency[index] = first_token_time[index] - start_time[index]
