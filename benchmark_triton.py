@@ -114,10 +114,10 @@ def benchmark_triton(
                     process.start()
                 for process in processes:
                     process.join()
-        print('first_token_latency: ', calculate_mean(first_token_latency))
-        print('avg_output_len: ', int(output_tokens/n))
-        print('latency', calculate_mean(latency))
-        print('throughput: ', calculate_mean(throughput))
+            print('first_token_latency: ', calculate_mean(first_token_latency))
+            print('avg_output_len: ', int(output_tokens/n))
+            print('latency', calculate_mean(latency))
+            print('throughput: ', calculate_mean(throughput))
         return
 
     with grpcclient.InferenceServerClient(addr, verbose=False) as client:
