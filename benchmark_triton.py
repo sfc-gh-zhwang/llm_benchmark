@@ -61,7 +61,7 @@ def start_stream(addr, tokenizer, model_name, inputs, index):
         client.start_stream(callback=partial(stream_callback, index))
         client.async_stream_infer(model_name, inputs)
 
-    global end_time
+    global end_time, output_tokens
     first_token_latency[index] = first_token_time[index] - start_time[index]
     latency[index] = end_time[index] - start_time[index]
     tokens = 0
