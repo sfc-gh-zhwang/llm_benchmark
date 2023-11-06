@@ -117,7 +117,7 @@ def benchmark_triton(
                     process.join()
             print('first_token_latency: ', calculate_mean(first_token_latency))
             output_tokens = 0
-            for one_output in range(output):
+            for one_output in output:
                 for ot in one_output:
                     output_len = len(tokenizer.encode(ot[0].decode())) - 1
                     output_tokens += input_len + output_len    # get rid of the start token.
