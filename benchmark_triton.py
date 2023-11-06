@@ -89,6 +89,7 @@ def benchmark_triton(
         _input("max_output_len", np.array([[max_output_len]]*batch_size, dtype=np.int32)),
     ]
     if streaming:
+        print("parallelism": parallelism)
         global first_token_latency, first_token_time, latency, throughput, output, start_time, end_time
         first_token_latency = [0]*n*parallelism
         first_token_time = [0]*n*parallelism
