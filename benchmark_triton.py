@@ -50,6 +50,7 @@ def start_stream(addr, input_len, tokenizer, model_name, inputs, index,
     with grpcclient.InferenceServerClient(addr, verbose=False) as client:
         first_token_time[index] = None
         start_time[index] = time.time()
+        print("start ", index)
         client.start_stream(callback=partial(stream_callback,
                                              index,
                                              end_time,
