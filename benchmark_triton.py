@@ -52,7 +52,7 @@ start_time = None
 output_tokens = None
 end_time = None
 
-def start_stream(addr, model_name, inputs, index):
+def start_stream(addr, tokenizer, model_name, inputs, index):
     print("start_stream index:", index)
     with grpcclient.InferenceServerClient(addr, verbose=False) as client:
         first_token_time[index] = None
@@ -105,6 +105,7 @@ def benchmark_triton(
                 start_stream(addr=addr,
                              model_name=model_name,
                              inputs=inputs,
+                             tokenizer=tokenizer,
                              index=i*parallelism+p)
             for ot in output:
                 output_len = len(tokenizer.encode(ot[0].decode())) - 1
