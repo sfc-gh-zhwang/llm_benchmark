@@ -120,7 +120,7 @@ def benchmark_triton(
             for one_output in output:
                 for ot in one_output:
                     output_len = len(tokenizer.encode(ot[0].decode())) - 1
-                    output_tokens += input_len + output_len    # get rid of the start token.
+                    output_tokens += output_len    # get rid of the start token.
             print('avg_output_len: ', int(output_tokens/(n*parallelism)))
             print('latency', calculate_mean(latency))
             print('throughput: ', calculate_mean(throughput))
