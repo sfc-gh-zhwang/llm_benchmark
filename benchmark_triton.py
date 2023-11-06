@@ -1,5 +1,5 @@
 import argparse
-import multiprocessing as mp
+import multiprocessing
 import time
 from functools import partial
 
@@ -96,13 +96,20 @@ def benchmark_triton(
         end_time = [0]*n*parallelism
         output_tokens = 0
         for i in tqdm(range(n)):
-            for p in range(parallelism):
-                start_stream(addr=addr,
-                             model_name=model_name,
-                             inputs=inputs,
-                             input_len=input_len,
-                             tokenizer=tokenizer,
-                             index=i*parallelism+p)
+            with multiprocessing.Manager():
+                processes = []
+                for p in range(parallelism):
+                    process = multiprocessing.Process(target=start_stream, args=(
+                        addr,
+                        input_len,
+                        tokenizer,
+                        model_name,
+                        inputs,
+                        i*parallelism+p))
+                    processes.append(process)
+                    process.start()
+                for process in processes:
+                    process.join()
         print('first_token_latency: ', calculate_mean(first_token_latency))
         print('avg_output_len: ', int(output_tokens/n))
         print('latency', calculate_mean(latency))
