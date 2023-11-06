@@ -61,7 +61,7 @@ def start_stream(addr, model_name, inputs, index):
     with grpcclient.InferenceServerClient(addr, verbose=False) as client:
         first_token_time[index] = None
         start_time = time.time()
-        client.start_stream(callback=partial(stream_callback,))
+        client.start_stream(callback=partial(stream_callback, index))
         client.async_stream_infer(model_name, inputs)
 
     global end_time
@@ -103,17 +103,11 @@ def benchmark_triton(
         end_time = [0]*n*parallelism
         output_tokens = 0
         for i in tqdm(range(n)):
-            with grpcclient.InferenceServerClient(addr, verbose=False) as client:
-                global first_token_time
-                first_token_time = None
-                start_time = time.time()
-                client.start_stream(callback=partial(stream_callback,))
-                client.async_stream_infer(model_name, inputs)
-
-            global end_time
-            first_token_latency[i] = first_token_time - start_time
-            latency[i] = end_time - start_time
-            tokens = 0
+            for p in range(parallelism):
+                start_stream(addr=addr,
+                             model_name=model_name,
+                             inputs=inputs,
+                             index=i*parallelism+p)
             for ot in output:
                 output_len = len(tokenizer.encode(ot[0].decode())) - 1
                 output_tokens += output_len
