@@ -51,6 +51,7 @@ output = None
 start_time = None
 output_tokens = None
 end_time = None
+output_tokens = None
 
 def start_stream(addr, tokenizer, model_name, inputs, index):
     print("start_stream index:", index)
@@ -91,7 +92,7 @@ def benchmark_triton(
     ]
     if streaming:
         print("parallelism:", parallelism)
-        global first_token_latency, first_token_time, latency, throughput, output, start_time, end_time
+        global first_token_latency, first_token_time, latency, throughput, output, start_time, end_time, output_tokens
         first_token_latency = [0]*n*parallelism
         first_token_time = [0]*n*parallelism
         latency = [0]*n*parallelism
