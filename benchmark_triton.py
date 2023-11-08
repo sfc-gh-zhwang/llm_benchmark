@@ -1,5 +1,5 @@
 import argparse
-import multiprocessing as mp
+import multiprocessing
 import time
 from functools import partial
 
@@ -29,23 +29,41 @@ def warmup(model_name, client):
     client.infer(model_name, inputs, outputs=outputs)
 
 
-start_time = None
-first_token_time = None
-end_time = None
-output = None
-
-
-def stream_callback(result, error):
+def stream_callback(index, end_time, output, first_token_time, result, error):
     # print('stream_callback')
-    global first_token_time
-    global end_time
-    global output
     if error:
         raise error
-    end_time = time.time()
-    output = result.as_numpy('output')
-    if first_token_time is None:
-        first_token_time = end_time
+    end_time[index] = time.time()
+    output[index] = result.as_numpy('output')
+    if first_token_time[index] is None:
+        first_token_time[index] = end_time[index]
+
+
+def start_stream(addr, input_len, tokenizer, model_name, inputs, index,
+                 first_token_latency,
+                 first_token_time,
+                 latency,
+                 throughput,
+                 output,
+                 start_time,
+                 end_time):
+    with grpcclient.InferenceServerClient(addr, verbose=False) as client:
+        first_token_time[index] = None
+        start_time[index] = time.time()
+        client.start_stream(callback=partial(stream_callback,
+                                             index,
+                                             end_time,
+                                             output,
+                                             first_token_time))
+        client.async_stream_infer(model_name, inputs)
+
+    first_token_latency[index] = first_token_time[index] - start_time[index]
+    latency[index] = end_time[index] - start_time[index]
+    tokens = 0
+    for ot in output[index]:
+        output_len = len(tokenizer.encode(ot[0].decode())) - 1
+        tokens += input_len + output_len    # get rid of the start token.
+    throughput[index] = tokens/latency[index]
 
 
 def benchmark_triton(
@@ -55,6 +73,7 @@ def benchmark_triton(
     batch_size,
     input_len,
     streaming,
+    parallelism,
     n,
     addr="localhost:8001",
         ):
@@ -66,32 +85,45 @@ def benchmark_triton(
         _input("max_output_len", np.array([[max_output_len]]*batch_size, dtype=np.int32)),
     ]
     if streaming:
-        first_token_latency = [0]*n
-        throughput = [0]*n
-        latency = [0]*n
-        output_tokens = 0
-        for i in tqdm(range(n)):
-            with grpcclient.InferenceServerClient(addr, verbose=False) as client:
-                global first_token_time
-                first_token_time = None
-                start_time = time.time()
-                client.start_stream(callback=partial(stream_callback,))
-                client.async_stream_infer(model_name, inputs)
-
-            global end_time
-            first_token_latency[i] = first_token_time - start_time
-            latency[i] = end_time - start_time
-            tokens = 0
-            for ot in output:
-                output_len = len(tokenizer.encode(ot[0].decode())) - 1
-                output_tokens += output_len
-                tokens += input_len + output_len    # get rid of the start token.
-            throughput[i] = tokens/latency[i]
-
-        print('first_token_latency: ', calculate_mean(first_token_latency))
-        print('avg_output_len: ', int(output_tokens/n))
-        print('latency', calculate_mean(latency))
-        print('throughput: ', calculate_mean(throughput))
+        with multiprocessing.Manager() as manager:
+            first_token_latency = manager.list([None]*n*parallelism)
+            first_token_time = manager.list([None]*n*parallelism)
+            latency = manager.list([None]*n*parallelism)
+            throughput = manager.list([None]*n*parallelism)
+            output = manager.list([None]*n*parallelism)
+            start_time = manager.list([None]*n*parallelism)
+            end_time = manager.list([None]*n*parallelism)
+            for i in tqdm(range(n)):
+                processes = []
+                for p in range(parallelism):
+                    process = multiprocessing.Process(target=start_stream,
+                                                      args=(
+                                                        addr,
+                                                        input_len,
+                                                        tokenizer,
+                                                        model_name,
+                                                        inputs,
+                                                        i*parallelism+p,
+                                                        first_token_latency,
+                                                        first_token_time,
+                                                        latency,
+                                                        throughput,
+                                                        output,
+                                                        start_time,
+                                                        end_time))
+                    processes.append(process)
+                    process.start()
+                for process in processes:
+                    process.join()
+            print('first_token_latency: ', calculate_mean(first_token_latency))
+            output_tokens = 0
+            for one_output in output:
+                for ot in one_output:
+                    output_len = len(tokenizer.encode(ot[0].decode())) - 1
+                    output_tokens += output_len    # get rid of the start token.
+            print('avg_output_len: ', int(output_tokens/(n*parallelism)))
+            print('latency', calculate_mean(latency))
+            print('throughput: ', calculate_mean(throughput))
         return
 
     with grpcclient.InferenceServerClient(addr, verbose=False) as client:
@@ -122,6 +154,7 @@ parser.add_argument("--batch_size", type=int, default=1)
 parser.add_argument("--max_output_len", type=int, default=32)
 parser.add_argument("--input_len", type=int, default=1)
 parser.add_argument("--n", type=int, default=50)
+parser.add_argument("--parallelism", type=int, default=1)
 parser.add_argument("--streaming", action='store_true', default=False, help="Whether or not to stream")
 
 # Parse the command-line arguments
@@ -138,6 +171,7 @@ benchmark_triton(model_name=args.model_name,
                  input_len=args.input_len,
                  batch_size=args.batch_size,
                  streaming=args.streaming,
+                 parallelism=args.parallelism,
                  n=args.n)
 
 ## python3 b.py --model_name llama-2-70b-hf-ft --input_len 1 --batch_size 1 --max_output_len 2048
