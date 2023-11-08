@@ -82,7 +82,7 @@ def benchmark_triton(
     print(f"Prompt: {prompts[0][:32]}..{prompts[0][-512:]}")
     inputs = [
         _input("text", np.array(prompts, dtype=object).reshape(-1, 1)),
-        _input("max_output_len", np.array([[max_output_len, max_output_len/2]]*int(batch_size/2), dtype=np.int32)),
+        _input("max_output_len", np.array([[max_output_len, max_output_len//2]]*(batch_size//2), dtype=np.int32)),
     ]
     if streaming:
         with multiprocessing.Manager() as manager:
