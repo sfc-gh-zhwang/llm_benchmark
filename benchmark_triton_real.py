@@ -39,7 +39,8 @@ def send_batch(client, model_name, n_requests, batch_size, max_output_len):
                                     dtype=object).reshape(-1, 1)),
             _input("max_output_len", np.array([[max_output_len]]*len(batch), dtype=np.int32))
         ]
-        client.infer(model_name, inputs)
+        resp = client.infer(model_name, inputs)
+        print(resp)
 
 
 def benchmark_triton_real(
