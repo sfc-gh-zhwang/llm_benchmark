@@ -41,10 +41,10 @@ def send_batch(client, model_name, n_requests, batch_size, max_output_len):
         ]
         resp = client.infer(model_name, inputs)
         output = resp.as_numpy('output')
-        input_sequence_lengths = resp.as_numpy('input_sequence_lengths').reshape(-1,).tolist()
-        output_sequence_lengths = resp.as_numpy('output_sequence_lengths').reshape(-1,).tolist()
-        print(input_sequence_lengths)
-        print(output_sequence_lengths)
+        # input_sequence_lengths = resp.as_numpy('input_sequence_lengths').reshape(-1,).tolist()
+        # output_sequence_lengths = resp.as_numpy('output_sequence_lengths').reshape(-1,).tolist()
+        # print(input_sequence_lengths)
+        # print(output_sequence_lengths)
         print(output)
 
 
