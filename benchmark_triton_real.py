@@ -45,7 +45,7 @@ def send_batch(client, model_name, n_requests, batch_size, max_output_len):
         # output_sequence_lengths = resp.as_numpy('output_sequence_lengths').reshape(-1,).tolist()
         # print(input_sequence_lengths)
         # print(output_sequence_lengths)
-        # print(output)
+        print(output)
 
 
 def benchmark_triton_real(
