@@ -49,3 +49,10 @@ def calculate_mean(data, confidence_level=0.95):
         up = mean + margin_of_error
         # return mean, lb, up, f'{mean:.4f}[{lb:.4f}, {up:.4f}]'
     return f'{mean:.4f}[{lb:.4f}, {up:.4f}]'
+
+
+def calculate_stats(lt):
+    max = max(lt)
+    min = min(lt)
+    mean = sum(lt)//len(lt)
+    return f'min: {min}, max: {max}, mean: {mean}'

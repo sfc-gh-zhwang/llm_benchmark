@@ -9,7 +9,7 @@ from tqdm import tqdm
 from transformers import AutoTokenizer
 from tritonclient.utils import *
 
-from utils import calculate_mean, generate_inputs, get_prompts
+from utils import calculate_mean, calculate_stats, generate_inputs, get_prompts
 
 
 def _input(name: str, data: np.ndarray) -> grpcclient.InferInput:
@@ -40,12 +40,12 @@ def send_batch(client, model_name, n_requests, batch_size, max_output_len):
             _input("max_output_len", np.array([[max_output_len]]*len(batch), dtype=np.int32))
         ]
         resp = client.infer(model_name, inputs)
-        output = resp.as_numpy('output')
         input_sequence_lengths = resp.as_numpy('input_sequence_lengths').reshape(-1,).tolist()
         output_sequence_lengths = resp.as_numpy('output_sequence_lengths').reshape(-1,).tolist()
-        print(input_sequence_lengths)
-        print(output_sequence_lengths)
-        print(output)
+        return input_sequence_lengths, output_sequence_lengths
+
+
+
 
 
 def benchmark_triton_real(
@@ -61,14 +61,20 @@ def benchmark_triton_real(
         warmup(model_name, client)
         print('done warm up')
         latency = [0]*n
+        input_sequence_lengths = []
+        output_sequence_lengths = []
         for i in tqdm(range(n)):
             start_time = time.time()
-            send_batch(client, model_name, n_requests, batch_size, max_output_len)
+            input, output = send_batch(client, model_name, n_requests, batch_size, max_output_len)
+            input_sequence_lengths += input
+            output_sequence_lengths += output
             end_time = time.time()
             latency[i] = end_time-start_time
             print(latency)
             print(f'latency: {calculate_mean(latency[:i+1])}')
         print(f'latency: {calculate_mean(latency)}')
+        print(f'prompt tokens: {calculate_stats(input_sequence_lengths)}')
+        print(f'generated tokens: {calculate_stats(input_sequence_lengths)}')
 
 
 parser = argparse.ArgumentParser(description="Benchmark")
