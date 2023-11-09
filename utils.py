@@ -52,7 +52,7 @@ def calculate_mean(data, confidence_level=0.95):
 
 
 def calculate_stats(lt):
-    max = max(lt)
-    min = min(lt)
+    _max = max(lt)
+    _min = min(lt)
     mean = sum(lt)//len(lt)
-    return f'min: {min}, max: {max}, mean: {mean}'
+    return f'min: {_min}, max: {_max}, mean: {mean}'
