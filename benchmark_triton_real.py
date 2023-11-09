@@ -60,6 +60,8 @@ def benchmark_triton_real(
             send_batch(client, model_name, n_requests, batch_size, max_output_len)
             end_time = time.time()
             latency[i] = end_time-start_time
+            print(latency)
+            print(f'latency: {calculate_mean(latency[:i+1])}')
         print(f'latency: {calculate_mean(latency)}')
 
 
