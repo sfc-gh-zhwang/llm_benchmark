@@ -1,6 +1,8 @@
+import csv
+
 import numpy as np
 from scipy import stats
-import csv
+
 
 def generate_input(tokenizer, token_num):
     if token_num <= 1:
