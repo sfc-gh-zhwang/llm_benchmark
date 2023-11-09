@@ -33,6 +33,7 @@ def send_batch(client, model_name, n_requests, batch_size, max_output_len):
     prompts = get_prompts(n_requests)
     for i in range(0, len(prompts), batch_size):
         batch = prompts[i:i+batch_size]
+        print(batch)
         inputs = [
             _input("text", np.array(batch,
                                     dtype=object).reshape(-1, 1)),
