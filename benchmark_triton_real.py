@@ -31,6 +31,8 @@ def warmup(model_name, client):
 
 def send_batch(client, model_name, n_requests, batch_size, max_output_len):
     prompts = get_prompts(n_requests)
+    input_sequence_lengths = []
+    output_sequence_lengths = []
     for i in range(0, len(prompts), batch_size):
         batch = prompts[i:i+batch_size]
         # print(batch)
@@ -40,9 +42,9 @@ def send_batch(client, model_name, n_requests, batch_size, max_output_len):
             _input("max_output_len", np.array([[max_output_len]]*len(batch), dtype=np.int32))
         ]
         resp = client.infer(model_name, inputs)
-        input_sequence_lengths = resp.as_numpy('input_sequence_lengths').reshape(-1,).tolist()
-        output_sequence_lengths = resp.as_numpy('output_sequence_lengths').reshape(-1,).tolist()
-        return input_sequence_lengths, output_sequence_lengths
+        input_sequence_lengths += resp.as_numpy('input_sequence_lengths').reshape(-1,).tolist()
+        output_sequence_lengths += resp.as_numpy('output_sequence_lengths').reshape(-1,).tolist()
+    return input_sequence_lengths, output_sequence_lengths
 
 
 
@@ -61,20 +63,18 @@ def benchmark_triton_real(
         warmup(model_name, client)
         print('done warm up')
         latency = [0]*n
-        input_sequence_lengths = []
-        output_sequence_lengths = []
         for i in tqdm(range(n)):
             start_time = time.time()
             input, output = send_batch(client, model_name, n_requests, batch_size, max_output_len)
-            input_sequence_lengths += input
-            output_sequence_lengths += output
             end_time = time.time()
             latency[i] = end_time-start_time
-            print(latency)
-            print(f'latency: {calculate_mean(latency[:i+1])}')
+            # print(latency)
+            # print(f'latency: {calculate_mean(latency[:i+1])}')
+            if i == 0:
+                print(f'prompt tokens: {calculate_stats(input)}')
+                print(f'generated tokens: {calculate_stats(output)}')
         print(f'latency: {calculate_mean(latency)}')
-        print(f'prompt tokens: {calculate_stats(input_sequence_lengths)}')
-        print(f'generated tokens: {calculate_stats(input_sequence_lengths)}')
+        
 
 
 parser = argparse.ArgumentParser(description="Benchmark")
