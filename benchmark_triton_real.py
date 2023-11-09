@@ -70,9 +70,8 @@ def benchmark_triton_real(
             latency[i] = end_time-start_time
             # print(latency)
             # print(f'latency: {calculate_mean(latency[:i+1])}')
-            if i == 0:
-                print(f'prompt tokens: {calculate_stats(input)}')
-                print(f'generated tokens: {calculate_stats(output)}')
+        print(f'prompt tokens: {calculate_stats(input)}')
+        print(f'generated tokens: {calculate_stats(output)}')
         print(f'latency: {calculate_mean(latency)}')
         
 
