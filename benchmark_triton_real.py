@@ -83,7 +83,7 @@ parser.add_argument("--model_name", type=str, default='llama-2-70b-chat-hf-tp-8'
 parser.add_argument("--batch_size", type=int, default=64)
 parser.add_argument("--requests", type=int, default=64)
 parser.add_argument("--max_output_len", type=int, default=512)
-parser.add_argument("--n", type=int, default=50)
+parser.add_argument("--n", type=int, default=5)
 
 # Parse the command-line arguments
 args = parser.parse_args()
