@@ -31,6 +31,9 @@ def warmup(model_name, client):
 
 def send_batch(client, model_name, n_requests, batch_size, max_output_len):
     prompts = get_prompts2(n_requests)
+    prompts = ['''<s>[INST]<<SYS>>
+    Please summarize the text that is given. Return just the summary and no additional conversational dialog such as ""Sure, here is the summary of the text:"".
+    <</SYS>> dr. goldberg offers everything i look for in a general practitioner.  he's nice and easy to talk to without being patronizing; he's always on time in seeing his patients; he's affiliated with a top-notch hospital (nyu) which my parents have explained to me is very important in case something happens and you need surgery; and you can get referrals to see specialists without having to see him first.  really, what more do you need?  i'm sitting here trying to think of any complaints i have about him, but i'm really drawing a blank.[/INST]''']
     input_sequence_lengths = []
     output_sequence_lengths = []
     for i in range(0, len(prompts), batch_size):
@@ -42,6 +45,7 @@ def send_batch(client, model_name, n_requests, batch_size, max_output_len):
             _input("max_output_len", np.array([[max_output_len]]*len(batch), dtype=np.int32))
         ]
         resp = client.infer(model_name, inputs)
+        print(resp)
         input_sequence_lengths += resp.as_numpy('input_sequence_lengths').reshape(-1,).tolist()
         output_sequence_lengths += resp.as_numpy('output_sequence_lengths').reshape(-1,).tolist()
     return input_sequence_lengths, output_sequence_lengths
