@@ -20,13 +20,13 @@ def generate_inputs(tokenizer, token_num, batch_size):
     return [generate_input(tokenizer, token_num) for _ in range(batch_size)]
 
 
-# def get_prompts(n):
-#     prompts = []
-#     with open('prompts/prompts2048.csv', newline='') as file:
-#         reader = csv.reader(file)
-#         for row in reader:
-#             prompts.append(row[0])
-#     return prompts[:n]
+def get_prompts2(n):
+    prompts = []
+    with open('prompts/prompts2048.csv', newline='') as file:
+        reader = csv.reader(file)
+        for row in reader:
+            prompts.append(row[0])
+    return prompts[:n]
 
 def shrink_sentence(s, r):
     words = s.split()
