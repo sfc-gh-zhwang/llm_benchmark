@@ -9,7 +9,7 @@ from tqdm import tqdm
 from transformers import AutoTokenizer
 from tritonclient.utils import *
 
-from utils import calculate_mean, calculate_stats, generate_inputs, get_prompts
+from utils import calculate_mean, calculate_stats, generate_inputs, get_prompts, get_prompts2
 
 
 def _input(name: str, data: np.ndarray) -> grpcclient.InferInput:
@@ -30,7 +30,7 @@ def warmup(model_name, client):
 
 
 def send_batch(client, model_name, n_requests, batch_size, max_output_len):
-    prompts = get_prompts(n_requests)
+    prompts = get_prompts2(n_requests)
     input_sequence_lengths = []
     output_sequence_lengths = []
     for i in range(0, len(prompts), batch_size):
