@@ -12,7 +12,7 @@ prompts = prompts * 1000
 sampling_params = SamplingParams(temperature=1, max_tokens=512)
 
 # Create an LLM.
-llm = LLM(model="/models/llama-2-7b-chat-hf/")
+llm = LLM(model="/models/llama-2-7b-chat-hf/", max_num_batched_tokens=50)
 # Generate texts from the prompts. The output is a list of RequestOutput objects
 # that contain the prompt, generated text, and other information.
 outputs = llm.generate(prompts, sampling_params)
