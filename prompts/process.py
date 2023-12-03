@@ -16,9 +16,10 @@ for i in ds['test']:
     l2.append(len(i['abstract']))
     id += 1
     article = i['article'].split()
-    if len(article) < 4000:
+    threshold = 12000
+    if len(article) < threshold:
         continue
-    article = ' '.join(article[:4000])
+    article = ' '.join(article[:threshold])
     data.append([article])
     if id >= 1024:
         break
