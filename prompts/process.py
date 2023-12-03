@@ -16,11 +16,13 @@ for i in ds['test']:
     l2.append(len(i['abstract']))
     id += 1
     article = i['article'].split()
-    article = ' '.join(article[:2000])
+    if len(article) < 4000:
+        continue
+    article = ' '.join(article[:4000])
     data.append([article])
     if id >= 1024:
         break
-with open('prompts/arxiv.csv', 'w', newline='') as csvfile:
+with open('prompts/arxiv2.csv', 'w', newline='') as csvfile:
     csv_writer = csv.writer(csvfile)
     csv_writer.writerows(data)
 
