@@ -46,7 +46,29 @@ def parse_args():
     return args
 
 
-def benchmark_mii(model, tensor_parallel, num_queries, warmup, prompt_length, max_new_tokens):
+class Benchmark:
+    def __init__(self, framework, num_queries, input_length, output_length, latency, tensor_parallel):
+        self.framework = framework
+        self.num_queries = num_queries
+        self.input_length = input_length
+        self.output_length = output_length
+        self.latency = latency
+        self.tensor_parallel = tensor_parallel
+
+    def __str__(self):
+        def _avg(lt):
+            return sum(lt) // len(lt)
+
+        return f'{self.framework}' \
+            f', {self.num_queries}' \
+            f', {_avg(self.input_length)}, {min(self.input_length)}, {max(self.input_length)}' \
+            f', {_avg(self.output_length)}, {min(self.output_length)}, {max(self.output_length)}' \
+            f', {latency: .2f}' \
+            f', {(sum(self.input_length)+sum(self.output_length))/latency: .2f}' \
+            f', {self.tensor_parallel}'
+
+
+def benchmark_mii(model, tensor_parallel, num_queries, warmup, prompt_lengths, max_new_tokens):
     import mii
     from deepspeed.inference import RaggedInferenceEngineConfig, DeepSpeedTPConfig
     from deepspeed.inference.v2.ragged import DSStateManagerConfig
@@ -74,28 +96,36 @@ def benchmark_mii(model, tensor_parallel, num_queries, warmup, prompt_length, ma
         llm.generate(warmup_prompts, max_new_tokens=max_new_tokens)
         print('warm up finished')
 
-    prompt_generator.reset()
-    prompts = prompt_generator.generate(average_token=prompt_length,
-                                        variance=prompt_length*0.3,
-                                        max_token=LLAMA2_MAX_SEQUENCE_LENGTH-max_new_tokens,
-                                        n=num_queries,
-                                        show_progress=True)
-    start = time.time()
-    outputs = llm.generate(prompts,
-                           do_sample=False,
-                           top_p=1.0,
-                           max_new_tokens=max_new_tokens)
-    latency = time.time() - start
-    llm.terminate_server()
+    benchmarks = []
+    for prompt_length in prompt_lengths:
+        for num_query in num_queries:
+            prompt_generator.reset()
+            prompts = prompt_generator.generate(average_token=prompt_length,
+                                                variance=prompt_length*0.3,
+                                                max_token=LLAMA2_MAX_SEQUENCE_LENGTH-max_new_tokens,
+                                                n=num_query,
+                                                show_progress=True)
+            start = time.time()
+            outputs = llm.generate(prompts,
+                                   do_sample=False,
+                                   top_p=1.0,
+                                   max_new_tokens=max_new_tokens)
+            latency = time.time() - start
+            llm.terminate_server()
 
-    input_lengths = []
-    output_lengths = []
+            input_lengths = []
+            output_lengths = []
 
-    for output in outputs:
-        input_lengths.append(output.prompt_length)
-        output_lengths.append(output.generated_length)
-
-    return latency, input_lengths, output_lengths
+            for output in outputs:
+                input_lengths.append(output.prompt_length)
+                output_lengths.append(output.generated_length)
+            benchmarks.append(Benchmark(framework='mii',
+                                        num_queries=num_query,
+                                        input_length=input_lengths,
+                                        output_length=output_lengths,
+                                        latency=latency,
+                                        tensor_parallel=tensor_parallel))
+    return benchmarks
 
 
 def benchmark_vllm(model, tensor_parallel, num_queries, warmup, prompt_length, max_new_tokens):
@@ -147,38 +177,35 @@ if __name__ == "__main__":
     print('========================================')
 
     result = []
-    for num_queries in args.num_queries:
-        for prompt_length in args.prompt_length:
-            if args.framework == 'vllm':
-                latency, input_lengths, output_lengths = benchmark_vllm(
-                    model=args.model,
-                    tensor_parallel=args.tensor_parallel,
-                    num_queries=num_queries,
-                    warmup=args.warmup,
-                    prompt_length=prompt_length,
-                    max_new_tokens=args.max_new_tokens)
-            elif args.framework == 'mii':
-                latency, input_lengths, output_lengths = benchmark_mii(
-                    model=args.model,
-                    tensor_parallel=args.tensor_parallel,
-                    num_queries=num_queries,
-                    warmup=args.warmup,
-                    prompt_length=prompt_length,
-                    max_new_tokens=args.max_new_tokens)
+    if args.framework == 'vllm':
+        latency, input_lengths, output_lengths = benchmark_vllm(
+            model=args.model,
+            tensor_parallel=args.tensor_parallel,
+            num_queries=num_queries,
+            warmup=args.warmup,
+            prompt_length=prompt_length,
+            max_new_tokens=args.max_new_tokens)
+    elif args.framework == 'mii':
+        benchmarks = benchmark_mii(
+            model=args.model,
+            tensor_parallel=args.tensor_parallel,
+            num_queries=args.num_queries,
+            warmup=args.warmup,
+            prompt_length=args.prompt_length,
+            max_new_tokens=args.max_new_tokens)
 
-            def _avg(lt):
-                return sum(lt) // len(lt)
 
-            result.append(
-                f'{args.framework}, {num_queries}, '
-                f'{_avg(input_lengths)}, {max(input_lengths)}, {min(input_lengths)}, '
-                f'{_avg(output_lengths)}, {max(output_lengths)}, {min(output_lengths)}, '
-                "{:.2f}".format(latency) + ', ' +
-                "{:.2f}".format((sum(input_lengths)+sum(output_lengths))/latency) +
-                f', {args.tensor_parallel}')
+
+            # result.append(
+            #     f'{args.framework}, {num_queries}, '
+            #     f'{_avg(input_lengths)}, {max(input_lengths)}, {min(input_lengths)}, '
+            #     f'{_avg(output_lengths)}, {max(output_lengths)}, {min(output_lengths)}, '
+            #     "{:.2f}".format(latency) + ', ' +
+            #     "{:.2f}".format((sum(input_lengths)+sum(output_lengths))/latency) +
+            #     f', {args.tensor_parallel}')
 
     print('framework, num_prompts, avg_input, max_input, min_input, avg_output, max_output, min_output, latency(s), throughput, tensor_parallel')
-    for i in result:
+    for i in benchmarks:
         print(i)
 
 
