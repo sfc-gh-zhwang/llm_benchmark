@@ -1,7 +1,7 @@
 from transformers import AutoTokenizer
 import csv
 import numpy as np
-
+from tqdm import tqdm
 
 class PromptsGenerator:
     def __init__(self, tokenizer_path):
@@ -24,7 +24,7 @@ Please summarize the text that is given. Return just the summary and no addition
         if n <= 0:
             return []
         prompts = []
-        for i in range(n):
+        for i in tqdm(range(n)):
             prompt_length = min(int(np.random.normal(average_token, variance)), max_token)
             prompt_length -= self.prompt_template_length
             prompt = self.texts[self.prompt_index]
