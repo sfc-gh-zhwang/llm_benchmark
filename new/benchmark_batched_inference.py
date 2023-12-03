@@ -26,7 +26,7 @@ def parse_args():
                         help="average number of tokens each prompt.",
                         type=int,
                         default=1024)
-    parser.add_argument('--framework', required=True, choices=['vllm', 'deepspeed', 'trtllm'])
+    parser.add_argument('--framework', required=True, choices=['vllm', 'mii', 'trtllm'])
     parser.add_argument("-tp",
                         "--tensor_para",
                         type=int,
@@ -38,11 +38,63 @@ def parse_args():
     return args
 
 
-def benchmark_vllm(model, tp, num_queries, warmup, prompt_length, max_new_tokens):
+def benchmark_mii(model, tensor_parallel, num_queries, warmup, prompt_length, max_new_tokens):
+    import mii
+    from deepspeed.inference import RaggedInferenceEngineConfig, DeepSpeedTPConfig
+    from deepspeed.inference.v2.ragged import DSStateManagerConfig
+
+    tp_config = DeepSpeedTPConfig(tp_size=tensor_parallel)
+    mgr_config = DSStateManagerConfig(max_ragged_batch_size=1024,
+                                      max_ragged_sequence_count=1024)
+    inference_config = RaggedInferenceEngineConfig(tensor_parallel=tp_config,
+                                                   state_manager=mgr_config)
+    llm = mii.serve(
+        model,
+        deployment_name='mii',
+        tensor_parallel=tensor_parallel,
+        inference_engine_config=inference_config,
+        replica_num=1,
+        task='text-generation'
+    )
+
+    prompt_generator = PromptsGenerator(tokenizer_path=model)
+    if warmup > 0:
+        print('warmming up...')
+        warmup_prompts = prompt_generator.generate(1024, 1024*0.3, 2048, warmup)
+        llm.generate(warmup_prompts, max_new_tokens=max_new_tokens)
+        print('warm up finished')
+
+    prompts = prompt_generator.generate(average_token=prompt_length,
+                                        variance=prompt_length*0.3,
+                                        max_token=LLAMA2_MAX_SEQUENCE_LENGTH-max_new_tokens,
+                                        n=num_queries,
+                                        show_progress=True)
+    start = time.time()
+    outputs = llm.generate(prompts,
+                           do_sample=False,
+                           temperature=None,
+                           top_p=1.0,
+                           top_k=None,
+                           ignore_eos=False,
+                           max_new_tokens=max_new_tokens)
+    latency = time.time() - start
+    llm.terminate_server()
+
+    input_lengths = []
+    output_lengths = []
+
+    for output in outputs:
+        input_lengths.append(output.prompt_length)
+        output_lengths.append(output.generated_length)
+
+    return latency, input_lengths, output_lengths
+
+
+def benchmark_vllm(model, tensor_parallel, num_queries, warmup, prompt_length, max_new_tokens):
     from vllm import LLM, SamplingParams
 
     # Create an LLM.
-    llm = LLM(model=model, tensor_parallel_size=tp)
+    llm = LLM(model=model, tensor_parallel_size=tensor_parallel)
 
     # Create a sampling params object.
     sampling_params = SamplingParams(temperature=0,  # get rid of nondeterminism.
