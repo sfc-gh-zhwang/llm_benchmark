@@ -191,7 +191,7 @@ if __name__ == "__main__":
             tensor_parallel=args.tensor_parallel,
             num_queries=args.num_queries,
             warmup=args.warmup,
-            prompt_length=args.prompt_length,
+            prompt_lengths=args.prompt_length,
             max_new_tokens=args.max_new_tokens)
 
 
