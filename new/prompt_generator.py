@@ -51,7 +51,6 @@ if __name__ == "__main__":
 
     l = []
     for i in prompts:
-        #print(i)
         l.append(len(tokenizer.encode(i)))
 
     print(len(l), max(l), min(l), sum(l)/len(l))
