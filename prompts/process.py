@@ -20,7 +20,6 @@ for i in ds['test']:
         continue
     id += 1
     article = ' '.join(article[:threshold])
-    print(article)
     data.append([article])
     if id >= 1024:
         break
