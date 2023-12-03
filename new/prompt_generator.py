@@ -40,6 +40,7 @@ Please summarize the text that is given. Return just the summary and no addition
 <</SYS>> {prompt} [/INST]'''
             if len(self.tokenizer.encode(prompt)) > 10000:
                 print(prompt)
+                print(prompt_length)
             prompts.append(prompt)
         return prompts
 
