@@ -27,7 +27,7 @@ Please summarize the text that is given. Return just the summary and no addition
         prompts = []
         for i in tqdm(range(n), disable=not show_progress, desc="Generating prompts"):
             prompt_length = min(int(np.random.normal(average_token, variance)), max_token)
-            prompt_length -= self.prompt_template_length
+            prompt_length = max(prompt_length-self.prompt_template_length, 16)
             prompt = self.texts[self.prompt_index]
             self.prompt_index += 1
             if self.prompt_index >= len(self.texts):
