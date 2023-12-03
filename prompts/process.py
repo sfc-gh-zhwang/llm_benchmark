@@ -15,7 +15,7 @@ for i in ds['test']:
     l1.append(len(i['article']))
     l2.append(len(i['abstract']))
     article = i['article'].split()
-    threshold = 8000
+    threshold = 12000
     if len(article) < threshold:
         continue
     id += 1
