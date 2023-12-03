@@ -14,14 +14,15 @@ data = []
 for i in ds['test']:
     l1.append(len(i['article']))
     l2.append(len(i['abstract']))
-    id += 1
     article = i['article'].split()
-    threshold = 12000
+    threshold = 20
     if len(article) < threshold:
         continue
+    id += 1
     article = ' '.join(article[:threshold])
-    data.append(article)
-    if id >= 2048:
+    print(article)
+    data.append([article])
+    if id >= 1024:
         break
 with open('prompts/arxiv2.csv', 'w', newline='') as csvfile:
     csv_writer = csv.writer(csvfile)
