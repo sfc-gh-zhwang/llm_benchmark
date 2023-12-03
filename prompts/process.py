@@ -21,7 +21,7 @@ for i in ds['test']:
         continue
     article = ' '.join(article[:threshold])
     data.append([article])
-    if id >= 1024:
+    if id >= 2048:
         break
 with open('prompts/arxiv2.csv', 'w', newline='') as csvfile:
     csv_writer = csv.writer(csvfile)
