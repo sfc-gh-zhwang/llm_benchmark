@@ -5,6 +5,14 @@ import time
 LLAMA2_MAX_SEQUENCE_LENGTH = 4096
 
 
+def list_of_ints(arg):
+    return list(map(int, arg.split(',')))
+
+
+def list_of_strings(arg):
+    return arg.split(',')
+
+
 def parse_args():
     parser = argparse.ArgumentParser(description="Benchmark inference")
     parser.add_argument("-k",
@@ -13,9 +21,9 @@ def parse_args():
                         default=1024)
     parser.add_argument("-n",
                         "--num_queries",
-                        type=int,
+                        type=list_of_ints,
                         help="number of queries to run",
-                        default=10)
+                        default='10')
     parser.add_argument("-w",
                         "--warmup",
                         type=int,
@@ -24,15 +32,15 @@ def parse_args():
     parser.add_argument("-l",
                         "--prompt_length",
                         help="average number of tokens each prompt.",
-                        type=int,
-                        default=1024)
+                        type=list_of_ints,
+                        default='1024')
     parser.add_argument('--framework', required=True, choices=['vllm', 'mii', 'trtllm'])
     parser.add_argument("-tp",
                         "--tensor_parallel",
-                        type=int,
+                        type=list_of_ints,
                         help="Tensor parallelism",
-                        default=1)
-    parser.add_argument('--model', required=True, help="path to the model")
+                        default='1')
+    parser.add_argument('--model', type=list_of_strings, required=True, help="path to the model")
 
     args = parser.parse_args()
     return args
