@@ -20,7 +20,7 @@ for i in ds['test']:
     if len(article) < threshold:
         continue
     article = ' '.join(article[:threshold])
-    data.append(i['article'])
+    data.append(article)
     if id >= 2048:
         break
 with open('prompts/arxiv2.csv', 'w', newline='') as csvfile:
