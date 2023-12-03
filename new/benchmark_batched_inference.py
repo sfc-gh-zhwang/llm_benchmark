@@ -48,6 +48,7 @@ def benchmark_mii(model, tensor_parallel, num_queries, warmup, prompt_length, ma
                                       max_ragged_sequence_count=768)
     inference_config = RaggedInferenceEngineConfig(tensor_parallel=tp_config,
                                                    state_manager=mgr_config)
+    start = time.time()
     llm = mii.serve(
         model,
         deployment_name='mii',
@@ -56,6 +57,7 @@ def benchmark_mii(model, tensor_parallel, num_queries, warmup, prompt_length, ma
         replica_num=1,
         task='text-generation'
     )
+    print('took ' + "{:.2f}".format(time.time()-start) + " seconds to start llm engine")
 
     prompt_generator = PromptsGenerator(tokenizer_path=model)
     if warmup > 0:
