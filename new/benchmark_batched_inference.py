@@ -9,7 +9,7 @@ prompts = [
 ]
 prompts = prompts * 1000
 # Create a sampling params object.
-sampling_params = SamplingParams(temperature=1, max_tokens=512)
+sampling_params = SamplingParams(temperature=0, max_tokens=512)
 
 # Create an LLM.
 llm = LLM(model="/models/llama-2-7b-chat-hf/", max_num_batched_tokens=4096)
