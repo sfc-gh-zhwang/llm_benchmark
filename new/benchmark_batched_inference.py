@@ -72,7 +72,6 @@ def benchmark_mii(model, tensor_parallel, num_queries, warmup, prompt_length, ma
     start = time.time()
     outputs = llm.generate(prompts,
                            do_sample=False,
-                           temperature=None,
                            top_p=1.0,
                            max_new_tokens=max_new_tokens)
     latency = time.time() - start
