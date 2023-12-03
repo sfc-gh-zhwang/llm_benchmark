@@ -163,7 +163,7 @@ if __name__ == "__main__":
                     tensor_parallel=args.tensor_parallel,
                     num_queries=num_queries,
                     warmup=args.warmup,
-                    prompt_length=args.prompt_length,
+                    prompt_length=prompt_length,
                     max_new_tokens=args.max_new_tokens)
 
             def _avg(lt):
