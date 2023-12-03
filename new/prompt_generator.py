@@ -47,7 +47,7 @@ Please summarize the text that is given. Return just the summary and no addition
 if __name__ == "__main__":
     tokenizer = AutoTokenizer.from_pretrained('/models/llama-2-7b-chat-hf')
     pg = PromptsGenerator('/models/llama-2-7b-chat-hf')
-    prompts = pg.generate(1024, 1024*0.3, 4096-1024, 1024)
+    prompts = pg.generate(1024, 1024*0.3, 4096-1024, 1024, show_progress=True)
 
     l = []
     for i in prompts:
