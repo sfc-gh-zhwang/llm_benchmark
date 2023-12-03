@@ -23,7 +23,7 @@ def parse_args():
                         "--prompt_length",
                         type=int,
                         default=1024)
-    parser.add_argument('--framework', choices=['vllm', 'deepspeed', 'trtllm'])
+    parser.add_argument('--framework', required=True, choices=['vllm', 'deepspeed', 'trtllm'])
 
     args = parser.parse_args()
     return args
