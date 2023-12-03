@@ -1,7 +1,7 @@
 from prompt_generator import PromptsGenerator
 import argparse
 
-LLAMA_MAX_SEQUENCE_LENGTH = 4096
+LLAMA2_MAX_SEQUENCE_LENGTH = 4096
 
 
 def parse_args():
@@ -54,7 +54,11 @@ def benchmark_vllm(model, tp, num_queries, warmup, prompt_length, max_new_tokens
         llm.generate(warmup_prompts, sampling_params)
         print('warm up finished')
 
-    prompts = prompt_generator.generate(prompt_length, prompt_length*0.3, LLAMA_MAX_SEQUENCE_LENGTH-max_new_tokens, num_queries, show_progress=True)
+    prompts = prompt_generator.generate(average_token=prompt_length,
+                                        variance=prompt_length*0.3,
+                                        max_token=LLAMA2_MAX_SEQUENCE_LENGTH-max_new_tokens,
+                                        n=num_queries,
+                                        show_progress=True)
     outputs = llm.generate(prompts, sampling_params)
     input_lengths = []
     output_lengths = []
