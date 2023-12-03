@@ -37,10 +37,10 @@ def parse_args():
     parser.add_argument('--framework', required=True, choices=['vllm', 'mii', 'trtllm'])
     parser.add_argument("-tp",
                         "--tensor_parallel",
-                        type=list_of_ints,
+                        type=int,
                         help="Tensor parallelism",
                         default='1')
-    parser.add_argument('--model', type=list_of_strings, required=True, help="path to the model")
+    parser.add_argument('--model', type=str, required=True, help="path to the model")
 
     args = parser.parse_args()
     return args
@@ -147,11 +147,11 @@ if __name__ == "__main__":
     print('========================================')
 
     result = []
-    for model, tensor_parallel, num_queries, prompt_length in enumerate(args.tensor_parallel, args.num_queries, args.prompt_length):
+    for num_queries, prompt_length in enumerate(args.num_queries, args.prompt_length):
         if args.framework == 'vllm':
             latency, input_lengths, output_lengths = benchmark_vllm(
                 model=args.model,
-                tensor_parallel=tensor_parallel,
+                tensor_parallel=args.tensor_parallel,
                 num_queries=num_queries,
                 warmup=args.warmup,
                 prompt_length=prompt_length,
@@ -159,7 +159,7 @@ if __name__ == "__main__":
         elif args.framework == 'mii':
             latency, input_lengths, output_lengths = benchmark_mii(
                 model=args.model,
-                tensor_parallel=tensor_parallel,
+                tensor_parallel=args.tensor_parallel,
                 num_queries=num_queries,
                 warmup=args.warmup,
                 prompt_length=args.prompt_length,
@@ -173,7 +173,8 @@ if __name__ == "__main__":
             f'{_avg(input_lengths)}, {max(input_lengths)}, {min(input_lengths)}, '
             f'{_avg(output_lengths)}, {max(output_lengths)}, {min(output_lengths)}, '
             "{:.2f}".format(latency) + ', ' +
-            "{:.2f}".format((sum(input_lengths)+sum(output_lengths))/latency))
+            "{:.2f}".format((sum(input_lengths)+sum(output_lengths))/latency) +
+            f', {args.tensor_parallel}')
 
     print('framework, num_prompts, avg_input, max_input, min_input, avg_output, max_output, min_output, latency(s), throughput, tensor_parallel')
     for i in result:
