@@ -74,8 +74,6 @@ def benchmark_mii(model, tensor_parallel, num_queries, warmup, prompt_length, ma
                            do_sample=False,
                            temperature=None,
                            top_p=1.0,
-                           top_k=None,
-                           ignore_eos=False,
                            max_new_tokens=max_new_tokens)
     latency = time.time() - start
     llm.terminate_server()
