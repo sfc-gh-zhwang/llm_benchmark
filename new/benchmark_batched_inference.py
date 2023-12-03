@@ -1,5 +1,6 @@
 from prompt_generator import PromptsGenerator
 import argparse
+import time
 
 LLAMA2_MAX_SEQUENCE_LENGTH = 4096
 
@@ -42,7 +43,7 @@ def benchmark_vllm(model, tp, num_queries, warmup, prompt_length, max_new_tokens
 
     # Create an LLM.
     llm = LLM(model=model, tensor_parallel_size=tp)
-    
+
     # Create a sampling params object.
     sampling_params = SamplingParams(temperature=0,  # get rid of nondeterminism.
                                      max_tokens=max_new_tokens)
@@ -59,15 +60,18 @@ def benchmark_vllm(model, tp, num_queries, warmup, prompt_length, max_new_tokens
                                         max_token=LLAMA2_MAX_SEQUENCE_LENGTH-max_new_tokens,
                                         n=num_queries,
                                         show_progress=True)
+    start = time.time()
     outputs = llm.generate(prompts, sampling_params)
+    latency = time.time() - start
+
     input_lengths = []
     output_lengths = []
 
     for output in outputs:
         input_lengths.append(len(output.prompt_token_ids))
         output_lengths.append(len(output.outputs[0].token_ids))
-    print(input_lengths)
-    print(output_lengths)
+
+    return latency, input_lengths, output_lengths
 
 
 if __name__ == "__main__":
@@ -78,13 +82,21 @@ if __name__ == "__main__":
     print('========================================')
 
     if args.framework == 'vllm':
-        benchmark_vllm(
+        latency, input_lengths, output_lengths = benchmark_vllm(
             model=args.model,
             tp=args.tensor_para,
             num_queries=args.num_queries,
             warmup=args.warmup,
             prompt_length=args.prompt_length,
             max_new_tokens=args.max_new_tokens)
+
+    def _avg(lt):
+        return sum(lt) // len(lt)
+    print('framework, num_prompts, avg_input, max_input, min_input, avg_output, max_output, min_output, latency(s)')
+    print(f'{args.framework}, {args.num_queries}, '
+          f'{_avg(input_lengths)}, {max(input_lengths)}, {min(input_lengths)}, '
+          f'{_avg(output_lengths)}, {max(output_lengths)}, {min(output_lengths)}, '
+          "{:.2f}".format(latency))
 
 
 # # Sample prompts.
