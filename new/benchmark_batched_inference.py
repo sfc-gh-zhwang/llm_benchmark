@@ -1,18 +1,17 @@
 from vllm import LLM, SamplingParams
+from prompt_generator import PromptsGenerator
 
 # Sample prompts.
-prompts = [
-    "Hello, my name is",
-    "The president of the United States is",
-    "The capital of France is",
-    "The future of AI is",
-]
-prompts = prompts * 20
+model_path = "/models/llama-2-7b-chat-hf/"
+prompt_generator = PromptsGenerator(tokenizer_path=model_path)
+
+prompts = prompt_generator.generate(1024, 1024*0.3, 4096-1024, 32, show_progress=True)
+
 # Create a sampling params object.
-sampling_params = SamplingParams(temperature=0, max_tokens=512)
+sampling_params = SamplingParams(temperature=0, max_tokens=1024)
 
 # Create an LLM.
-llm = LLM(model="/models/llama-2-7b-chat-hf/", max_num_batched_tokens=4096)
+llm = LLM(model=model_path)
 # Generate texts from the prompts. The output is a list of RequestOutput objects
 # that contain the prompt, generated text, and other information.
 outputs = llm.generate(prompts, sampling_params)
