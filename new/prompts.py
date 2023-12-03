@@ -49,4 +49,4 @@ l = []
 for i in prompts:
     l.append(len(tokenizer.encode(i)))
 
-print(max(l), min(l), sum(l)/len(l))
+print(len(l), max(l), min(l), sum(l)/len(l))
