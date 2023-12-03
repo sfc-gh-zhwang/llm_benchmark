@@ -3,9 +3,10 @@ import csv
 import numpy as np
 from tqdm import tqdm
 
+
 class PromptsGenerator:
     def __init__(self, tokenizer_path):
-        self.tokenizer = AutoTokenizer.from_pretrained('/models/llama-2-7b-chat-hf')
+        self.tokenizer = AutoTokenizer.from_pretrained(tokenizer_path)
 
         self.texts = []
         with open('/models/llm_benchmark/prompts/arxiv2.csv', newline='') as file:
@@ -41,8 +42,9 @@ Please summarize the text that is given. Return just the summary and no addition
             )
         return prompts
 
+
 tokenizer = AutoTokenizer.from_pretrained('/models/llama-2-7b-chat-hf')
-pg = PromptsGenerator(None)
+pg = PromptsGenerator('/models/llama-2-7b-chat-hf')
 prompts = pg.generate(1024, 1024*0.3, 4096-1024, 32)
 
 l = []
