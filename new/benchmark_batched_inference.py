@@ -64,6 +64,7 @@ def benchmark_mii(model, tensor_parallel, num_queries, warmup, prompt_length, ma
         llm.generate(warmup_prompts, max_new_tokens=max_new_tokens)
         print('warm up finished')
 
+    prompt_generator.reset()
     prompts = prompt_generator.generate(average_token=prompt_length,
                                         variance=prompt_length*0.3,
                                         max_token=LLAMA2_MAX_SEQUENCE_LENGTH-max_new_tokens,
@@ -106,6 +107,7 @@ def benchmark_vllm(model, tensor_parallel, num_queries, warmup, prompt_length, m
         llm.generate(warmup_prompts, sampling_params)
         print('warm up finished')
 
+    prompt_generator.reset()
     prompts = prompt_generator.generate(average_token=prompt_length,
                                         variance=prompt_length*0.3,
                                         max_token=LLAMA2_MAX_SEQUENCE_LENGTH-max_new_tokens,
