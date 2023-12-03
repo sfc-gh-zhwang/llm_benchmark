@@ -141,6 +141,14 @@ if __name__ == "__main__":
             warmup=args.warmup,
             prompt_length=args.prompt_length,
             max_new_tokens=args.max_new_tokens)
+    elif args.framework == 'mii':
+        latency, input_lengths, output_lengths = benchmark_mii(
+            model=args.model,
+            tp=args.tensor_para,
+            num_queries=args.num_queries,
+            warmup=args.warmup,
+            prompt_length=args.prompt_length,
+            max_new_tokens=args.max_new_tokens)
 
     def _avg(lt):
         return sum(lt) // len(lt)
