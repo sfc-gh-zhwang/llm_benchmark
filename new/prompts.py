@@ -40,6 +40,7 @@ Please summarize the text that is given. Return just the summary and no addition
 Please summarize the text that is given. Return just the summary and no additional conversational dialog such as ""Sure, here is the summary of the text:"".
 <</SYS>> {prompt}[/INST]'''
             )
+        return prompts
 
 tokenizer = AutoTokenizer.from_pretrained('/models/llama-2-7b-chat-hf')
 pg = PromptsGenerator(None)
