@@ -7,7 +7,7 @@ prompts = [
     "The capital of France is",
     "The future of AI is",
 ]
-prompts = prompts * 100
+prompts = prompts * 1000
 # Create a sampling params object.
 sampling_params = SamplingParams(temperature=0.8, top_p=0.95)
 
