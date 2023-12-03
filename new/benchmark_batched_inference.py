@@ -44,7 +44,8 @@ def benchmark_vllm(model, tp, num_queries, warmup, prompt_length, max_new_tokens
     llm = LLM(model=model, tensor_parallel_size=tp)
     
     # Create a sampling params object.
-    sampling_params = SamplingParams(temperature=0, max_tokens=max_new_tokens)
+    sampling_params = SamplingParams(temperature=0, # get rid of nondeterminism.
+                                     max_tokens=max_new_tokens)
 
     prompt_generator = PromptsGenerator(tokenizer_path=model)
     if warmup > 0:
