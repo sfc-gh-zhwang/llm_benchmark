@@ -54,7 +54,7 @@ def benchmark_vllm(model, tp, num_queries, warmup, prompt_length, max_new_tokens
         print('warm up finished')
 
     prompts = prompt_generator.generate(prompt_length, prompt_length*0.3, LLAMA_MAX_SEQUENCE_LENGTH-max_new_tokens, num_queries, show_progress=True)
-    outputs = llm.generate(prompts, sampling_params)
+    outputs = llm.generate(warmup_prompts, sampling_params)
     for output in outputs:
         print(output)
 
