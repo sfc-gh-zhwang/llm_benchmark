@@ -9,7 +9,7 @@ class PromptsGenerator:
         self.tokenizer = AutoTokenizer.from_pretrained(tokenizer_path)
 
         self.texts = []
-        with open('./arxiv2.csv', newline='') as file:
+        with open('./arxiv.csv', newline='') as file:
             reader = csv.reader(file)
             for row in reader:
                 self.texts.append(row[0])
