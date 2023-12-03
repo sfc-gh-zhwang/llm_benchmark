@@ -25,7 +25,7 @@ Please summarize the text that is given. Return just the summary and no addition
         if n <= 0:
             return []
         prompts = []
-        prompt_lengths = np.clip(np.random.normal(average_token, variance, n).astype(int), a_min=None, a_max=max_token)
+        prompt_lengths = np.clip(np.random.normal(average_token, variance, n).astype(int), a_min=1, a_max=max_token)
         for i in tqdm(range(n)):
             prompt_length = prompt_lengths[i]
             prompt_length -= self.prompt_template_length
