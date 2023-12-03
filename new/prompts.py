@@ -16,7 +16,7 @@ class PromptsGenerator:
 
         prompt_template = '''<s>[INST]<<SYS>>
 Please summarize the text that is given. Return just the summary and no additional conversational dialog such as ""Sure, here is the summary of the text:"".
-<</SYS>> [/INST]'''
+<</SYS>>  [/INST]'''
         self.prompt_template_length = len(self.tokenizer.encode(prompt_template))
         np.random.seed(37)
 
@@ -32,12 +32,12 @@ Please summarize the text that is given. Return just the summary and no addition
             if self.prompt_index >= len(self.texts):
                 self.prompt_index = 0
             prompt_tokens = self.tokenizer.encode(prompt)[:prompt_length]
-            prompt = self.tokenizer.decode(prompt_tokens)
+            prompt = self.tokenizer.decode(prompt_tokens, skip_special_tokens=True)
 
             prompts.append(
                 f'''<s>[INST]<<SYS>>
 Please summarize the text that is given. Return just the summary and no additional conversational dialog such as ""Sure, here is the summary of the text:"".
-<</SYS>> {prompt}[/INST]'''
+<</SYS>> {prompt} [/INST]'''
             )
         return prompts
 
