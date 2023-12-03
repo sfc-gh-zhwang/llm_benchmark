@@ -21,12 +21,12 @@ Please summarize the text that is given. Return just the summary and no addition
         self.prompt_template_length = len(self.tokenizer.encode(prompt_template))
         np.random.seed(37)
 
-    def generate(self, average_token, variance, max_token, n):
+    def generate(self, average_token, variance, max_token, n, show_progress=False):
         if n <= 0:
             return []
         prompts = []
         prompt_lengths = np.clip(np.random.normal(average_token, variance, n).astype(int), a_min=16, a_max=max_token)
-        for i in tqdm(range(n)):
+        for i in tqdm(range(n), disable=not show_progress):
             prompt_length = prompt_lengths[i]
             prompt_length -= self.prompt_template_length
             prompt = self.texts[self.prompt_index]
