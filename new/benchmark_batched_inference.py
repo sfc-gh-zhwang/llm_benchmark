@@ -28,7 +28,7 @@ def parse_args():
                         default=1024)
     parser.add_argument('--framework', required=True, choices=['vllm', 'mii', 'trtllm'])
     parser.add_argument("-tp",
-                        "--tensor_para",
+                        "--tensor_parallel",
                         type=int,
                         help="Tensor parallelism",
                         default=1)
@@ -136,7 +136,7 @@ if __name__ == "__main__":
     if args.framework == 'vllm':
         latency, input_lengths, output_lengths = benchmark_vllm(
             model=args.model,
-            tp=args.tensor_para,
+            tensor_parallel=args.tensor_parallel,
             num_queries=args.num_queries,
             warmup=args.warmup,
             prompt_length=args.prompt_length,
@@ -144,7 +144,7 @@ if __name__ == "__main__":
     elif args.framework == 'mii':
         latency, input_lengths, output_lengths = benchmark_mii(
             model=args.model,
-            tp=args.tensor_para,
+            tensor_parallel=args.tensor_parallel,
             num_queries=args.num_queries,
             warmup=args.warmup,
             prompt_length=args.prompt_length,
