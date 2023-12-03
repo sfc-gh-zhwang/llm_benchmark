@@ -10,4 +10,4 @@ with open('/models/llm_benchmark/prompts/arxiv2.csv', newline='') as file:
     l = []
     for row in reader:
         l.append(len(tokenizer.encode(row[0])))
-    print(min(l))
+    print(min(l), len(l))
