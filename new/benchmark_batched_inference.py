@@ -1,5 +1,41 @@
 from vllm import LLM, SamplingParams
 from prompt_generator import PromptsGenerator
+import argparse
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(description="Benchmark inference")
+    parser.add_argument("-k",
+                        "--max_new_tokens",
+                        type=int,
+                        default=1024)
+    parser.add_argument("-n",
+                        "--num_queries",
+                        type=int,
+                        help="number of queries to run",
+                        default=10)
+    parser.add_argument("-w",
+                        "--warmup",
+                        type=int,
+                        help="number of queries for warming up",
+                        default=32)
+    parser.add_argument("-l",
+                        "--prompt_length",
+                        type=int,
+                        default=1024)
+    parser.add_argument('--framework', choices=['vllm', 'deepspeed', 'trtllm'])
+
+    args = parser.parse_args()
+    return args
+
+
+if __name__ == "__main__":
+    args = parse_args()
+    print('\n=============== Argument ===============')
+    for key in vars(args):
+        print('{}: {}'.format(key, vars(args)[key]))
+    print('========================================')
+
 
 # Sample prompts.
 model_path = "/models/llama-2-7b-chat-hf/"
