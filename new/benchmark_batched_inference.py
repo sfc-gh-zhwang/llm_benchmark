@@ -170,7 +170,7 @@ if __name__ == "__main__":
                 return sum(lt) // len(lt)
 
             result.append(
-                f'{args.framework}, {args.num_queries}, '
+                f'{args.framework}, {num_queries}, '
                 f'{_avg(input_lengths)}, {max(input_lengths)}, {min(input_lengths)}, '
                 f'{_avg(output_lengths)}, {max(output_lengths)}, {min(output_lengths)}, '
                 "{:.2f}".format(latency) + ', ' +
