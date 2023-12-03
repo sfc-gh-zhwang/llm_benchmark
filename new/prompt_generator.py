@@ -43,6 +43,9 @@ Please summarize the text that is given. Return just the summary and no addition
             prompts.append(prompt)
         return prompts
 
+    def reset(self):
+        self.prompt_index = 0
+
 
 if __name__ == "__main__":
     tokenizer = AutoTokenizer.from_pretrained('/models/llama-2-7b-chat-hf')
