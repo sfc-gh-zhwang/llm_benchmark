@@ -49,14 +49,21 @@ def benchmark_vllm(model, tp, num_queries, warmup, prompt_length, max_new_tokens
     prompt_generator = PromptsGenerator(tokenizer_path=model)
     if warmup > 0:
         print('warmming up...')
-        warmup_prompts = prompt_generator.generate(1024, 1024*0.3, 2048, warmup, show_progress=True)
+        warmup_prompts = prompt_generator.generate(1024, 1024*0.3, 2048, warmup)
         llm.generate(warmup_prompts, sampling_params)
         print('warm up finished')
 
+    print('generating prompts...')
     prompts = prompt_generator.generate(prompt_length, prompt_length*0.3, LLAMA_MAX_SEQUENCE_LENGTH-max_new_tokens, num_queries, show_progress=True)
-    outputs = llm.generate(warmup_prompts, sampling_params)
+    outputs = llm.generate(prompts, sampling_params)
+    input_lengths = []
+    output_lengths = []
+
     for output in outputs:
-        print(output)
+        input_lengths.append(len(output.prompt_token_ids))
+        output_lengths.append(len(output.outputs[0].token_ids))
+    print(input_lengths)
+    print(output_lengths)
 
 
 if __name__ == "__main__":
