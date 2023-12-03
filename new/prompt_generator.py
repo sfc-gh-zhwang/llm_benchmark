@@ -15,7 +15,7 @@ class PromptsGenerator:
                 self.texts.append(row[0])
         self.prompt_index = 0
 
-        prompt_template = '''<s>[INST]<<SYS>>
+        prompt_template = '''[INST]<<SYS>>
 Please summarize the text that is given. Return just the summary and no additional conversational dialog such as ""Sure, here is the summary of the text:"".
 <</SYS>>  [/INST]'''
         self.prompt_template_length = len(self.tokenizer.encode(prompt_template))
@@ -37,7 +37,7 @@ Please summarize the text that is given. Return just the summary and no addition
             prompt = self.tokenizer.decode(prompt_tokens, skip_special_tokens=True)
 
             prompts.append(
-                f'''<s>[INST]<<SYS>>
+                f'''[INST]<<SYS>>
 Please summarize the text that is given. Return just the summary and no additional conversational dialog such as ""Sure, here is the summary of the text:"".
 <</SYS>> {prompt} [/INST]'''
             )
