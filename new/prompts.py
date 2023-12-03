@@ -23,7 +23,6 @@ Please summarize the text that is given. Return just the summary and no addition
     def generate(self, average_token, variance, max_token, n):
         if n <= 0:
             return []
-
         prompts = []
         for i in range(n):
             prompt_length = min(int(np.random.normal(average_token, variance)), max_token)
