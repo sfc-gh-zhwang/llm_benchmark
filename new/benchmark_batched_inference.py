@@ -151,11 +151,12 @@ if __name__ == "__main__":
 
     def _avg(lt):
         return sum(lt) // len(lt)
-    print('framework, num_prompts, avg_input, max_input, min_input, avg_output, max_output, min_output, latency(s)')
+    print('framework, num_prompts, avg_input, max_input, min_input, avg_output, max_output, min_output, latency(s), throughput')
     print(f'{args.framework}, {args.num_queries}, '
           f'{_avg(input_lengths)}, {max(input_lengths)}, {min(input_lengths)}, '
           f'{_avg(output_lengths)}, {max(output_lengths)}, {min(output_lengths)}, '
-          "{:.2f}".format(latency))
+          "{:.2f}".format(latency) + ', ' +
+          "{:.2f}".format((sum(input_lengths)+sum(output_lengths))/latency))
 
 
 # # Sample prompts.
