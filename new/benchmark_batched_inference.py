@@ -94,7 +94,9 @@ def benchmark_vllm(model, tensor_parallel, num_queries, warmup, prompt_length, m
     from vllm import LLM, SamplingParams
 
     # Create an LLM.
+    start = time.time()
     llm = LLM(model=model, tensor_parallel_size=tensor_parallel)
+    print('took ' + "{:.2f}".format(time.time()-start) + " seconds to start llm engine")
 
     # Create a sampling params object.
     sampling_params = SamplingParams(temperature=0,  # get rid of nondeterminism.
