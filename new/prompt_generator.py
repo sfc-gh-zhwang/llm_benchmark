@@ -35,6 +35,7 @@ Please summarize the text that is given. Return just the summary and no addition
             if self.prompt_index >= len(self.texts):
                 self.prompt_index = 0
             prompt_tokens = self.tokenizer.encode(prompt)[:prompt_length]
+            print(len(prompt_tokens))
             prompt = self.tokenizer.decode(prompt_tokens, skip_special_tokens=True)
 
             prompts.append(
