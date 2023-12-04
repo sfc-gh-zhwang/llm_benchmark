@@ -60,12 +60,13 @@ class Benchmark:
         self.max_input = max(input_length)
         self.min_input = min(input_length)
 
+        self.framework = framework
+
         self.avg_output = _avg(output_length)
         self.max_output = max(output_length)
         self.min_output = min(output_length)
 
         self.tensor_parallel = tensor_parallel
-        self.framework = framework
         self.throughput = (sum(input_length)+sum(output_length))/latency
         self.latency = latency
 
