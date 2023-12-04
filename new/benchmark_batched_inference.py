@@ -1,6 +1,8 @@
 from prompt_generator import PromptsGenerator
 import argparse
 import time
+import torch
+import gc
 from functools import total_ordering
 
 
@@ -159,6 +161,8 @@ def benchmark_mii(model, tensor_parallel, num_queries, warmup, prompt_lengths, m
 
 def benchmark_vllm(model, tensor_parallel, num_queries, warmup, prompt_lengths, max_new_tokens):
     from vllm import LLM, SamplingParams
+    from vllm.model_executor.parallel_utils.parallel_state import destroy_model_parallel
+
 
     # Create an LLM.
     start = time.time()
@@ -205,6 +209,12 @@ def benchmark_vllm(model, tensor_parallel, num_queries, warmup, prompt_lengths, 
                                         latency=latency,
                                         tensor_parallel=tensor_parallel))
 
+    # Destroy
+    destroy_model_parallel()
+    del llm
+    gc.collect()
+    torch.cuda.empty_cache()
+    torch.distributed.destroy_process_group()
     return benchmarks
 
 
