@@ -51,10 +51,7 @@ def parse_args():
 
 class Benchmark:
     def __init__(self, framework, num_queries, input_length, output_length, latency, tensor_parallel):
-        self.framework = framework
         self.num_queries = num_queries
-        self.latency = latency
-        self.tensor_parallel = tensor_parallel
 
         def _avg(lt):
             return sum(lt) // len(lt)
@@ -67,6 +64,10 @@ class Benchmark:
         self.max_output = max(output_length)
         self.min_output = min(output_length)
         self.output_length = output_length
+
+        self.tensor_parallel = tensor_parallel
+        self.framework = framework
+        self.latency = latency
 
     def __str__(self):
         return f'{self.framework}' \
@@ -219,6 +220,8 @@ if __name__ == "__main__":
                 warmup=args.warmup,
                 prompt_lengths=args.prompt_length,
                 max_new_tokens=args.max_new_tokens)
+
+    benchmarks = sorted(benchmarks)
 
     print('framework, num_prompts, avg_input, max_input, min_input, avg_output, max_output, min_output, latency(s), throughput, tensor_parallel')
     for i in benchmarks:
