@@ -66,8 +66,8 @@ class Benchmark:
 
         self.tensor_parallel = tensor_parallel
         self.framework = framework
+        self.throughput = (sum(input_length)+sum(output_length))/latency
         self.latency = latency
-        self.throughput = (sum(input_length)+sum(output_length))/self.latency
 
     def __str__(self):
         return f'{self.framework}' \
