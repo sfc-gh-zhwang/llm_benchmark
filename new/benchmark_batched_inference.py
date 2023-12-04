@@ -53,19 +53,26 @@ class Benchmark:
     def __init__(self, framework, num_queries, input_length, output_length, latency, tensor_parallel):
         self.framework = framework
         self.num_queries = num_queries
-        self.input_length = input_length
-        self.output_length = output_length
         self.latency = latency
         self.tensor_parallel = tensor_parallel
 
-    def __str__(self):
         def _avg(lt):
             return sum(lt) // len(lt)
 
+        self.avg_input = _avg(input_length)
+        self.max_input = max(input_length)
+        self.min_input = min(input_length)
+
+        self.avg_output = _avg(output_length)
+        self.max_output = max(output_length)
+        self.min_output = min(output_length)
+        self.output_length = output_length
+
+    def __str__(self):
         return f'{self.framework}' \
             f', {self.num_queries}' \
-            f', {_avg(self.input_length)}, {min(self.input_length)}, {max(self.input_length)}' \
-            f', {_avg(self.output_length)}, {min(self.output_length)}, {max(self.output_length)}' \
+            f', {self.avg_input}, {self.min_input}, {self.max_input}' \
+            f', {self.avg_output}, {self.min_output}, {self.max_output}' \
             f', {self.latency: .2f}' \
             f', {(sum(self.input_length)+sum(self.output_length))/self.latency: .2f}' \
             f', {self.tensor_parallel}'
