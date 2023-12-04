@@ -1,6 +1,8 @@
 from prompt_generator import PromptsGenerator
 import argparse
 import time
+from functools import total_ordering
+
 
 LLAMA2_MAX_SEQUENCE_LENGTH = 4096
 
@@ -49,6 +51,7 @@ def parse_args():
     return args
 
 
+@total_ordering
 class Benchmark:
     def __init__(self, framework, num_queries, input_length, output_length, latency, tensor_parallel):
         self.num_queries = num_queries
@@ -79,6 +82,16 @@ class Benchmark:
             f', {self.latency: .2f}' \
             f', {self.throughput: .2f}' \
             f', {self.tensor_parallel}'
+    
+    def __lt__(self, other):
+        if self.num_queries != other.num_queries:
+            return self.num_queries < other.num_queries
+        if self.avg_input != other.avg_input:
+            return self.avg_input < other.avg_input
+        if self.tensor_parallel != other.tensor_parallel:
+            return self.tensor_parallel < other.tensor_parallel
+        if self.framework != other.framework:
+            return self.framework < other.framework
 
 
 def benchmark_mii(model, tensor_parallel, num_queries, warmup, prompt_lengths, max_new_tokens):
