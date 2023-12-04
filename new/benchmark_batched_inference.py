@@ -148,12 +148,15 @@ def benchmark_mii(model, tensor_parallel, num_queries, warmup, prompt_lengths, m
             for output in outputs:
                 input_lengths.append(output.prompt_length)
                 output_lengths.append(output.generated_length)
-            benchmarks.append(Benchmark(framework='mii',
-                                        num_queries=num_query,
-                                        input_length=input_lengths,
-                                        output_length=output_lengths,
-                                        latency=latency,
-                                        tensor_parallel=tensor_parallel))
+            benchmark = Benchmark(
+                                framework='mii',
+                                num_queries=num_query,
+                                input_length=input_lengths,
+                                output_length=output_lengths,
+                                latency=latency,
+                                tensor_parallel=tensor_parallel)
+            print(benchmark)
+            benchmarks.append(benchmark)
 
     llm.terminate_server()
     return benchmarks
@@ -202,12 +205,15 @@ def benchmark_vllm(model, tensor_parallel, num_queries, warmup, prompt_lengths, 
                 input_lengths.append(len(output.prompt_token_ids))
                 output_lengths.append(len(output.outputs[0].token_ids))
 
-            benchmarks.append(Benchmark(framework='vllm',
-                                        num_queries=num_query,
-                                        input_length=input_lengths,
-                                        output_length=output_lengths,
-                                        latency=latency,
-                                        tensor_parallel=tensor_parallel))
+            benchmark = Benchmark(
+                                framework='vllm',
+                                num_queries=num_query,
+                                input_length=input_lengths,
+                                output_length=output_lengths,
+                                latency=latency,
+                                tensor_parallel=tensor_parallel)
+            print(benchmark)
+            benchmarks.append(benchmark)
 
     # Destroy
     destroy_model_parallel()
