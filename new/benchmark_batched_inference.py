@@ -172,7 +172,7 @@ def benchmark_vllm(model, tensor_parallel, num_queries, warmup, prompt_lengths, 
                 input_lengths.append(len(output.prompt_token_ids))
                 output_lengths.append(len(output.outputs[0].token_ids))
 
-            benchmarks.append(Benchmark(framework='mii',
+            benchmarks.append(Benchmark(framework='vllm',
                                         num_queries=num_query,
                                         input_length=input_lengths,
                                         output_length=output_lengths,
