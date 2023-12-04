@@ -222,6 +222,67 @@ def benchmark_vllm(model, tensor_parallel, num_queries, warmup, prompt_lengths, 
     return benchmarks
 
 
+def benchmark_trtllm(model, tensor_parallel, num_queries, warmup, prompt_lengths, max_new_tokens):
+    from vllm import LLM, SamplingParams
+    from vllm.model_executor.parallel_utils.parallel_state import destroy_model_parallel
+
+
+    # Create an LLM.
+    start = time.time()
+    llm = LLM(model=model, tensor_parallel_size=tensor_parallel)
+    print('took ' + "{:.2f}".format(time.time()-start) + " seconds to start llm engine")
+
+    # Create a sampling params object.
+    sampling_params = SamplingParams(temperature=0,  # get rid of nondeterminism.
+                                     top_p=1.0,
+                                     top_k=-1,
+                                     max_tokens=max_new_tokens)
+
+    prompt_generator = PromptsGenerator(tokenizer_path=model)
+    if warmup > 0:
+        print('warmming up...')
+        warmup_prompts = prompt_generator.generate(1024, 1024*0.3, 2048, warmup)
+        llm.generate(warmup_prompts, sampling_params)
+        print('warm up finished')
+
+    benchmarks = []
+    for prompt_length in prompt_lengths:
+        for num_query in num_queries:
+            prompt_generator.reset()
+            prompts = prompt_generator.generate(average_token=prompt_length,
+                                                variance=prompt_length*0.3,
+                                                max_token=LLAMA2_MAX_SEQUENCE_LENGTH-max_new_tokens,
+                                                n=num_query,
+                                                show_progress=True)
+            start = time.time()
+            outputs = llm.generate(prompts, sampling_params)
+            latency = time.time() - start
+
+            input_lengths = []
+            output_lengths = []
+
+            for output in outputs:
+                input_lengths.append(len(output.prompt_token_ids))
+                output_lengths.append(len(output.outputs[0].token_ids))
+
+            benchmarks.append(Benchmark(framework='vllm',
+                                        num_queries=num_query,
+                                        input_length=input_lengths,
+                                        output_length=output_lengths,
+                                        latency=latency,
+                                        tensor_parallel=tensor_parallel))
+            for i in benchmarks:
+                print(i)
+
+    # Destroy
+    # destroy_model_parallel()
+    # del llm
+    # gc.collect()
+    # torch.cuda.empty_cache()
+    # torch.distributed.destroy_process_group()
+    return benchmarks
+
+
 if __name__ == "__main__":
     args = parse_args()
     print('\n=============== Argument ===============')
@@ -242,6 +303,15 @@ if __name__ == "__main__":
 
     if 'vllm' in args.framework:
         benchmarks += benchmark_vllm(
+                model=args.model,
+                tensor_parallel=args.tensor_parallel,
+                num_queries=args.num_queries,
+                warmup=args.warmup,
+                prompt_lengths=args.prompt_length,
+                max_new_tokens=args.max_new_tokens)
+
+    if 'trtllm' in args.framework:
+        benchmarks += benchmark_trtllm(
                 model=args.model,
                 tensor_parallel=args.tensor_parallel,
                 num_queries=args.num_queries,
