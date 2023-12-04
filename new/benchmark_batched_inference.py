@@ -57,10 +57,11 @@ class Benchmark:
             return sum(lt) // len(lt)
 
         self.avg_input = _avg(input_length)
-        self.max_input = max(input_length)
-        self.min_input = min(input_length)
 
         self.framework = framework
+
+        self.max_input = max(input_length)
+        self.min_input = min(input_length)
 
         self.avg_output = _avg(output_length)
         self.max_output = max(output_length)
