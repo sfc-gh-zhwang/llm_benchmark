@@ -63,10 +63,10 @@ class Benchmark:
         self.avg_output = _avg(output_length)
         self.max_output = max(output_length)
         self.min_output = min(output_length)
-        self.output_length = output_length
 
         self.tensor_parallel = tensor_parallel
         self.framework = framework
+        self.throughput = (sum(input_length)+sum(output_length))/self.latency
         self.latency = latency
 
     def __str__(self):
@@ -75,7 +75,7 @@ class Benchmark:
             f', {self.avg_input}, {self.min_input}, {self.max_input}' \
             f', {self.avg_output}, {self.min_output}, {self.max_output}' \
             f', {self.latency: .2f}' \
-            f', {(sum(self.input_length)+sum(self.output_length))/self.latency: .2f}' \
+            f', {self.throughput: .2f}' \
             f', {self.tensor_parallel}'
 
 
