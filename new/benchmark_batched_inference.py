@@ -150,24 +150,34 @@ def benchmark_vllm(model, tensor_parallel, num_queries, warmup, prompt_lengths, 
         llm.generate(warmup_prompts, sampling_params)
         print('warm up finished')
 
-    prompt_generator.reset()
-    prompts = prompt_generator.generate(average_token=prompt_length,
-                                        variance=prompt_length*0.3,
-                                        max_token=LLAMA2_MAX_SEQUENCE_LENGTH-max_new_tokens,
-                                        n=num_queries,
-                                        show_progress=True)
-    start = time.time()
-    outputs = llm.generate(prompts, sampling_params)
-    latency = time.time() - start
+    benchmarks = []
+    for prompt_length in prompt_lengths:
+        for num_query in num_queries:
+            prompt_generator.reset()
+            prompts = prompt_generator.generate(average_token=prompt_length,
+                                                variance=prompt_length*0.3,
+                                                max_token=LLAMA2_MAX_SEQUENCE_LENGTH-max_new_tokens,
+                                                n=num_query,
+                                                show_progress=True)
+            start = time.time()
+            outputs = llm.generate(prompts, sampling_params)
+            latency = time.time() - start
 
-    input_lengths = []
-    output_lengths = []
+            input_lengths = []
+            output_lengths = []
 
-    for output in outputs:
-        input_lengths.append(len(output.prompt_token_ids))
-        output_lengths.append(len(output.outputs[0].token_ids))
+            for output in outputs:
+                input_lengths.append(len(output.prompt_token_ids))
+                output_lengths.append(len(output.outputs[0].token_ids))
 
-    return latency, input_lengths, output_lengths
+            benchmarks.append(Benchmark(framework='mii',
+                                        num_queries=num_query,
+                                        input_length=input_lengths,
+                                        output_length=output_lengths,
+                                        latency=latency,
+                                        tensor_parallel=tensor_parallel))
+
+    return benchmarks
 
 
 if __name__ == "__main__":
@@ -179,12 +189,12 @@ if __name__ == "__main__":
 
     result = []
     if args.framework == 'vllm':
-        latency, input_lengths, output_lengths = benchmark_vllm(
+        benchmarks = benchmark_vllm(
             model=args.model,
             tensor_parallel=args.tensor_parallel,
             num_queries=args.num_queries,
             warmup=args.warmup,
-            prompt_length=args.prompt_length,
+            prompt_lengths=args.prompt_length,
             max_new_tokens=args.max_new_tokens)
     elif args.framework == 'mii':
         benchmarks = benchmark_mii(
