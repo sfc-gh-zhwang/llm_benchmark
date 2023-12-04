@@ -111,7 +111,6 @@ def benchmark_mii(model, tensor_parallel, num_queries, warmup, prompt_lengths, m
                                    top_p=1.0,
                                    max_new_tokens=max_new_tokens)
             latency = time.time() - start
-            llm.terminate_server()
 
             input_lengths = []
             output_lengths = []
@@ -125,10 +124,12 @@ def benchmark_mii(model, tensor_parallel, num_queries, warmup, prompt_lengths, m
                                         output_length=output_lengths,
                                         latency=latency,
                                         tensor_parallel=tensor_parallel))
+            
+    llm.terminate_server()
     return benchmarks
 
 
-def benchmark_vllm(model, tensor_parallel, num_queries, warmup, prompt_length, max_new_tokens):
+def benchmark_vllm(model, tensor_parallel, num_queries, warmup, prompt_lengths, max_new_tokens):
     from vllm import LLM, SamplingParams
 
     # Create an LLM.
@@ -181,9 +182,9 @@ if __name__ == "__main__":
         latency, input_lengths, output_lengths = benchmark_vllm(
             model=args.model,
             tensor_parallel=args.tensor_parallel,
-            num_queries=num_queries,
+            num_queries=args.num_queries,
             warmup=args.warmup,
-            prompt_length=prompt_length,
+            prompt_length=args.prompt_lengths,
             max_new_tokens=args.max_new_tokens)
     elif args.framework == 'mii':
         benchmarks = benchmark_mii(
@@ -191,7 +192,7 @@ if __name__ == "__main__":
             tensor_parallel=args.tensor_parallel,
             num_queries=args.num_queries,
             warmup=args.warmup,
-            prompt_lengths=args.prompt_length,
+            prompt_lengths=args.prompt_lengths,
             max_new_tokens=args.max_new_tokens)
 
 
