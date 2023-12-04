@@ -82,7 +82,7 @@ class Benchmark:
             f', {self.latency: .2f}' \
             f', {self.throughput: .2f}' \
             f', {self.tensor_parallel}'
-    
+
     def __lt__(self, other):
         if self.num_queries != other.num_queries:
             return self.num_queries < other.num_queries
