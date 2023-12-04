@@ -209,7 +209,7 @@ if __name__ == "__main__":
                 warmup=args.warmup,
                 prompt_lengths=args.prompt_length,
                 max_new_tokens=args.max_new_tokens)
- 
+
     # benchmark vllm last since seems there is no way to release the GPU memory for vllm
     if 'vllm' in args.framework:
         benchmarks += benchmark_vllm(
