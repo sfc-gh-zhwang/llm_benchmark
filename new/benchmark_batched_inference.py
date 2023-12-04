@@ -210,11 +210,11 @@ def benchmark_vllm(model, tensor_parallel, num_queries, warmup, prompt_lengths, 
                                         tensor_parallel=tensor_parallel))
 
     # Destroy
-    # destroy_model_parallel()
-    # del llm
-    # gc.collect()
-    # torch.cuda.empty_cache()
-    # torch.distributed.destroy_process_group()
+    destroy_model_parallel()
+    del llm
+    gc.collect()
+    torch.cuda.empty_cache()
+    torch.distributed.destroy_process_group()
     return benchmarks
 
 
