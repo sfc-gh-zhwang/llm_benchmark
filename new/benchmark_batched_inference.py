@@ -220,35 +220,6 @@ if __name__ == "__main__":
                 prompt_lengths=args.prompt_length,
                 max_new_tokens=args.max_new_tokens)
 
-
-
-
-            # result.append(
-            #     f'{args.framework}, {num_queries}, '
-            #     f'{_avg(input_lengths)}, {max(input_lengths)}, {min(input_lengths)}, '
-            #     f'{_avg(output_lengths)}, {max(output_lengths)}, {min(output_lengths)}, '
-            #     "{:.2f}".format(latency) + ', ' +
-            #     "{:.2f}".format((sum(input_lengths)+sum(output_lengths))/latency) +
-            #     f', {args.tensor_parallel}')
-
     print('framework, num_prompts, avg_input, max_input, min_input, avg_output, max_output, min_output, latency(s), throughput, tensor_parallel')
     for i in benchmarks:
         print(i)
-    time.sleep(10000)
-
-
-# # Sample prompts.
-# model_path = "/models/llama-2-7b-chat-hf/"
-# prompt_generator = PromptsGenerator(tokenizer_path=model_path)
-
-# prompts = prompt_generator.generate(1024, 1024*0.3, 4096-1024, 32, show_progress=True)
-
-
-# # Generate texts from the prompts. The output is a list of RequestOutput objects
-# # that contain the prompt, generated text, and other information.
-# outputs = llm.generate(prompts, sampling_params)
-# # Print the outputs.
-# for output in outputs:
-#     prompt = output.prompt
-#     generated_text = output.outputs[0].text
-#     print(f"Prompt: {prompt!r}, Generated text: {generated_text!r}")
