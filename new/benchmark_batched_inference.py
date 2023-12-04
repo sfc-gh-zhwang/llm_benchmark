@@ -124,7 +124,7 @@ def benchmark_mii(model, tensor_parallel, num_queries, warmup, prompt_lengths, m
                                         output_length=output_lengths,
                                         latency=latency,
                                         tensor_parallel=tensor_parallel))
-            
+
     llm.terminate_server()
     return benchmarks
 
