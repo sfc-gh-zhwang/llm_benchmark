@@ -148,15 +148,14 @@ def benchmark_mii(model, tensor_parallel, num_queries, warmup, prompt_lengths, m
             for output in outputs:
                 input_lengths.append(output.prompt_length)
                 output_lengths.append(output.generated_length)
-            benchmark = Benchmark(
-                                framework='mii',
-                                num_queries=num_query,
-                                input_length=input_lengths,
-                                output_length=output_lengths,
-                                latency=latency,
-                                tensor_parallel=tensor_parallel)
-            print(benchmark)
-            benchmarks.append(benchmark)
+            benchmarks.append(Benchmark(framework='mii',
+                                        num_queries=num_query,
+                                        input_length=input_lengths,
+                                        output_length=output_lengths,
+                                        latency=latency,
+                                        tensor_parallel=tensor_parallel))
+            for i in benchmarks:
+                print(i)
 
     llm.terminate_server()
     return benchmarks
@@ -205,22 +204,21 @@ def benchmark_vllm(model, tensor_parallel, num_queries, warmup, prompt_lengths, 
                 input_lengths.append(len(output.prompt_token_ids))
                 output_lengths.append(len(output.outputs[0].token_ids))
 
-            benchmark = Benchmark(
-                                framework='vllm',
-                                num_queries=num_query,
-                                input_length=input_lengths,
-                                output_length=output_lengths,
-                                latency=latency,
-                                tensor_parallel=tensor_parallel)
-            print(benchmark)
-            benchmarks.append(benchmark)
+            benchmarks.append(Benchmark(framework='vllm',
+                                        num_queries=num_query,
+                                        input_length=input_lengths,
+                                        output_length=output_lengths,
+                                        latency=latency,
+                                        tensor_parallel=tensor_parallel))
+            for i in benchmarks:
+                print(i)
 
     # Destroy
-    destroy_model_parallel()
-    del llm
-    gc.collect()
-    torch.cuda.empty_cache()
-    torch.distributed.destroy_process_group()
+    # destroy_model_parallel()
+    # del llm
+    # gc.collect()
+    # torch.cuda.empty_cache()
+    # torch.distributed.destroy_process_group()
     return benchmarks
 
 
