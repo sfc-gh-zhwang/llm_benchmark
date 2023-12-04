@@ -34,7 +34,10 @@ def parse_args():
                         help="average number of tokens each prompt.",
                         type=list_of_ints,
                         default='1024')
-    parser.add_argument('--framework', required=True, choices=['vllm', 'mii', 'trtllm'])
+    parser.add_argument('--framework',
+                        required=True,
+                        type=list_of_strings,
+                        default='vllm,mii')
     parser.add_argument("-tp",
                         "--tensor_parallel",
                         type=int,
@@ -189,23 +192,25 @@ if __name__ == "__main__":
         print('{}: {}'.format(key, vars(args)[key]))
     print('========================================')
 
-    result = []
-    if args.framework == 'vllm':
-        benchmarks = benchmark_vllm(
-            model=args.model,
-            tensor_parallel=args.tensor_parallel,
-            num_queries=args.num_queries,
-            warmup=args.warmup,
-            prompt_lengths=args.prompt_length,
-            max_new_tokens=args.max_new_tokens)
-    elif args.framework == 'mii':
-        benchmarks = benchmark_mii(
-            model=args.model,
-            tensor_parallel=args.tensor_parallel,
-            num_queries=args.num_queries,
-            warmup=args.warmup,
-            prompt_lengths=args.prompt_length,
-            max_new_tokens=args.max_new_tokens)
+    benchmarks = []
+
+    if 'mii' in args.framework:
+        benchmarks += benchmark_mii(
+                model=args.model,
+                tensor_parallel=args.tensor_parallel,
+                num_queries=args.num_queries,
+                warmup=args.warmup,
+                prompt_lengths=args.prompt_length,
+                max_new_tokens=args.max_new_tokens)
+    if 'vllm' in args.framework:
+        benchmarks += benchmark_vllm(
+                model=args.model,
+                tensor_parallel=args.tensor_parallel,
+                num_queries=args.num_queries,
+                warmup=args.warmup,
+                prompt_lengths=args.prompt_length,
+                max_new_tokens=args.max_new_tokens)
+
 
 
 
