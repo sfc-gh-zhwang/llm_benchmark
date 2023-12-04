@@ -105,12 +105,14 @@ def benchmark_mii(model, tensor_parallel, num_queries, warmup, prompt_lengths, m
                                                 max_token=LLAMA2_MAX_SEQUENCE_LENGTH-max_new_tokens,
                                                 n=num_query,
                                                 show_progress=True)
+            print('generating...')
             start = time.time()
             outputs = llm.generate(prompts,
                                    do_sample=False,
                                    top_p=1.0,
                                    max_new_tokens=max_new_tokens)
             latency = time.time() - start
+            print('generating finished')
 
             input_lengths = []
             output_lengths = []
