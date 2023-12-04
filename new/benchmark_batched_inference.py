@@ -63,8 +63,8 @@ class Benchmark:
             f', {self.num_queries}' \
             f', {_avg(self.input_length)}, {min(self.input_length)}, {max(self.input_length)}' \
             f', {_avg(self.output_length)}, {min(self.output_length)}, {max(self.output_length)}' \
-            f', {latency: .2f}' \
-            f', {(sum(self.input_length)+sum(self.output_length))/latency: .2f}' \
+            f', {self.latency: .2f}' \
+            f', {(sum(self.input_length)+sum(self.output_length))/self.latency: .2f}' \
             f', {self.tensor_parallel}'
 
 
