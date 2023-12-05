@@ -224,7 +224,7 @@ def benchmark_vllm(model, tensor_parallel, num_queries, warmup, prompt_lengths, 
 
 def benchmark_trtllm(model, tensor_parallel, num_queries, warmup, prompt_lengths, max_new_tokens):
     from tensorrt_llm_llama import TrtLLM
-    
+
     llm = TrtLLM(tokenizer_dir=model)
 
     prompt_generator = PromptsGenerator(tokenizer_path=model)
