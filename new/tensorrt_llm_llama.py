@@ -121,5 +121,11 @@ class TrtLLM:
 
             output_ids = self.decoder.decode_batch(
                 line_encoded, sampling_config)
-        print(output_ids.tolist())
+        output_beams_list = [
+            self.tokenizer.batch_decode(output_ids[batch_idx, :,
+                                                   input_lengths[batch_idx]:],
+                                                   skip_special_tokens=True)
+            for batch_idx in range(len(prompts))
+        ]
+        print(output_beams_list)
         return prompts
