@@ -94,8 +94,10 @@ class TrtLLM:
         self.tokenizer = AutoTokenizer.from_pretrained(tokenizer_dir)
 
     def generate(self, prompts):
-
+        batch_size = len(prompts)
         line_encoded = []
+        if len(prompts) == 1:
+            prompts = prompts[0]
         input_id = self.tokenizer.encode(prompts,
                                          return_tensors='pt').type(torch.int32)
         line_encoded.append(input_id)
@@ -115,7 +117,7 @@ class TrtLLM:
                                                               pad_id=0)
         print(sampling_config)
         with torch.no_grad():
-            self.decoder.setup(batch_size=1,
+            self.decoder.setup(batch_size=batch_size,
                                max_context_length=max_length,
                                max_new_tokens=1024)
 
@@ -125,7 +127,7 @@ class TrtLLM:
             self.tokenizer.batch_decode(output_ids[batch_idx, :,
                                                    input_lengths[batch_idx]:],
                                                    skip_special_tokens=True)
-            for batch_idx in range(len(prompts))
+            for batch_idx in range(batch_size)
         ]
         print(output_beams_list)
         return prompts
