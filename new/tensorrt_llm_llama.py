@@ -125,5 +125,6 @@ class TrtLLM:
                                                    skip_special_tokens=True)
             for batch_idx in range(batch_size)
         ]
-        print(output_beams_list)
+        for i in output_beams_list:
+            print(i)
         return prompts
