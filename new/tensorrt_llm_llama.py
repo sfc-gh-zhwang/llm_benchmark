@@ -121,5 +121,5 @@ class TrtLLM:
 
             output_ids = self.decoder.decode_batch(
                 line_encoded, sampling_config)
-        print(output_ids)
+        print(output_ids.tolist())
         return prompts
