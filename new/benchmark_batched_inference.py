@@ -244,7 +244,7 @@ def benchmark_trtllm(model, tensor_parallel, num_queries, warmup, prompt_lengths
                                                 n=num_query,
                                                 show_progress=True)
             latency, input_lengths, output_lengths = llm.generate(prompts, max_new_tokens=max_new_tokens)
-            benchmarks.append(Benchmark(framework='vllm',
+            benchmarks.append(Benchmark(framework='trtllm',
                                         num_queries=num_query,
                                         input_length=input_lengths,
                                         output_length=output_lengths,
