@@ -30,6 +30,7 @@ class TrtLLM:
                     _input("request_output_len", np.array([max_new_tokens], dtype=np.uint32).reshape(1, -1)),
                 ]
                 output = client.infer(model_name, inputs).as_numpy("output_ids")
+                print(client.infer(model_name, inputs).as_numpy("sequence_length"))
                 print(output)
                 print(tokenizer.decode(output.reshape(-1)))
             # Create and start n threads
