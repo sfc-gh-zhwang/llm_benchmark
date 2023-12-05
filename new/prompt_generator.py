@@ -52,12 +52,22 @@ if __name__ == "__main__":
     import torch
     model = '/Users/zhwang/models/llama-2-7b-chat-hf'
     tokenizer = AutoTokenizer.from_pretrained(model)
-    pg = PromptsGenerator(model)
-    prompts = pg.generate(2048, 2048*0.3, 4096-1024, 2, show_progress=True)
-    # prompts = ['hello', 'hello world']
-    # input_id = tokenizer(prompts,
-    #                      padding=False)
-    # print(input_id)
+    # pg = PromptsGenerator(model)
+    # prompts = pg.generate(2048, 2048*0.3, 4096-1024, 2, show_progress=True)
+    prompts = ['hello', 'hello world']
+    line_encoded = []
+    input_id = tokenizer(prompts,
+                         padding=False).input_ids
+    line_encoded.append(input_id)
+    print(line_encoded)
+    input_lengths = []
+    for i in input_id:
+        input_lengths.append(len(i))
+    max_length = max(input_lengths)
+
+    line_encoded = [
+        torch.tensor(t, dtype=torch.int32).cuda() for t in input_id
+    ]
     l = []
     for i in prompts:
         l.append(len(tokenizer.encode(i)))
