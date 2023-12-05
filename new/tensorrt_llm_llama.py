@@ -102,7 +102,8 @@ class TrtLLM:
                                   padding=False)
         line_encoded.append(input_id)
         input_lengths = []
-        input_lengths.append(input_id.shape[-1])
+        for i in input_id:
+            input_lengths.append(len(i))
         max_length = max(input_lengths)
 
         line_encoded = [
