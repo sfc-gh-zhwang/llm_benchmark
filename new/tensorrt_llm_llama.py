@@ -27,7 +27,7 @@ class TrtLLM:
         with grpcclient.InferenceServerClient("localhost:8001", verbose=False) as client:
             threads = []
 
-            def send(client, model_name, input_id, input_length max_new_tokens):
+            def send(client, model_name, input_id, input_length, max_new_tokens):
                 inputs = [
                     _input("input_ids", np.array(input_id, dtype=object).reshape(1, -1)),
                     _input("input_lengths", np.array([input_length], dtype=object).reshape(1, -1)),
