@@ -41,14 +41,4 @@ class TrtLLM:
                 for process in processes:
                     process.join()
         print(shared_list)
-            # send(client, self.tokenizer, 'tensorrt_llm', input_id[0], input_lengths[0], max_new_tokens)
-
-        output_beams_list = [
-            self.tokenizer.batch_decode(output_ids[batch_idx, :,
-                                                   input_lengths[batch_idx]:],
-                                                   skip_special_tokens=True)
-            for batch_idx in range(batch_size)
-        ]
-        for i in output_beams_list:
-            print(i)
         return prompts
