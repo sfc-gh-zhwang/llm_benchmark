@@ -23,7 +23,7 @@ class TrtLLM:
             input_lengths.append(len(i))
 
         with grpcclient.InferenceServerClient("localhost:8001", verbose=False) as client:
-            def send(client, model_name, input_id, input_length, max_new_tokens):
+            def send(client, tokenizer, model_name, input_id, input_length, max_new_tokens):
                 inputs = [
                     _input("input_ids", np.array(input_id, dtype=np.int32).reshape(1, -1)),
                     _input("input_lengths", np.array([input_length], dtype=np.int32).reshape(1, -1)),
@@ -31,8 +31,9 @@ class TrtLLM:
                 ]
                 output = client.infer(model_name, inputs).as_numpy("output_ids")
                 print(output)
+                print(tokenizer.decode(output.reshape(-1)))
             # Create and start n threads
-            send(client, 'tensorrt_llm', input_id[0], input_lengths[0], max_new_tokens)
+            send(client, self.tokenizer, 'tensorrt_llm', input_id[0], input_lengths[0], max_new_tokens)
 
         output_beams_list = [
             self.tokenizer.batch_decode(output_ids[batch_idx, :,
