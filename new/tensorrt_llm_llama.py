@@ -5,6 +5,7 @@ from tensorrt_llm.quantization import QuantMode
 import json
 import os
 import torch
+from transformers import AutoTokenizer
 
 
 def get_engine_name(model, dtype, tp_size, pp_size, rank):
@@ -14,7 +15,7 @@ def get_engine_name(model, dtype, tp_size, pp_size, rank):
                                                 pp_size, rank)
 
 
-def TRTLLaMA(engine_dir):
+def get_decoder(engine_dir):
     config_path = os.path.join(engine_dir, 'config.json')
     with open(config_path, 'r') as f:
         config = json.load(f)
@@ -85,3 +86,23 @@ def TRTLLaMA(engine_dir):
         f'Load engine takes: {profiler.elapsed_time_in_sec("load tensorrt_llm engine")} sec'
     )
     return decoder
+
+
+class TrtLLM:
+    def __init__(self, engine_dir, tokenizer_dir):
+        self.decoder = get_decoder(engine_dir=engine_dir)
+        self.tokenizer = AutoTokenizer.from_pretrained(tokenizer_dir)
+
+    def generate(self, prompts):
+
+        line_encoded = []
+        input_id = self.tokenizer.encode(prompts,
+                                         return_tensors='pt').type(torch.int32)
+        line_encoded.append(input_id)
+        input_lengths = []
+        input_lengths.append(input_id.shape[-1])
+        max_length = max(input_lengths)
+
+        pad_id = self.tokenizer.encode(tokenizer.pad_token, add_special_tokens=False)[0]
+        end_id = self.tokenizer.encode(tokenizer.eos_token, add_special_tokens=False)[0]
+        return prompts

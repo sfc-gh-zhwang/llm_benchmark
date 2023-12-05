@@ -4,7 +4,7 @@ import time
 import torch
 import gc
 from functools import total_ordering
-from tensorrt_llm_llama import TRTLLaMA
+from tensorrt_llm_llama import TrtLLM
 
 
 LLAMA2_MAX_SEQUENCE_LENGTH = 4096
@@ -224,7 +224,8 @@ def benchmark_vllm(model, tensor_parallel, num_queries, warmup, prompt_lengths, 
 
 
 def benchmark_trtllm(model, tensor_parallel, num_queries, warmup, prompt_lengths, max_new_tokens):
-    tensorrt_llm_llama = TRTLLaMA('/models/trt_engines/llama-2-7b-chat-hf/1-gpu/')
+    llm = TrtLLM(engine_dir='/models/trt_engines/llama-2-7b-chat-hf/1-gpu/',
+                 tokenizer_dir=model)
 
 
 if __name__ == "__main__":
