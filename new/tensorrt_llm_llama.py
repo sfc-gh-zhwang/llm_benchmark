@@ -96,18 +96,18 @@ class TrtLLM:
     def generate(self, prompts):
         batch_size = len(prompts)
         line_encoded = []
-        # if len(prompts) == 1:
-        #     prompts = prompts[0]
-        input_id = self.tokenizer.encode(prompts,
-                                         return_tensors='pt').type(torch.int32)
-        print(input_id)
+        if len(prompts) == 1:
+            prompts = prompts[0]
+        input_id = self.tokenizer(prompts,
+                                  padding=False,
+                                  return_tensors='pt').type(torch.int32)
         line_encoded.append(input_id)
         input_lengths = []
         input_lengths.append(input_id.shape[-1])
         max_length = max(input_lengths)
 
         line_encoded = [
-            torch.tensor(t, dtype=torch.int32).cuda() for t in input_id
+            torch.tensor(t, dtype=torch.int32).cuda() for t in line_encoded
         ]
         print(line_encoded)
         input_lengths = torch.tensor(input_lengths, dtype=torch.int32).cuda()

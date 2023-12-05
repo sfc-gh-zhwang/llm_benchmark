@@ -54,9 +54,10 @@ if __name__ == "__main__":
     tokenizer = AutoTokenizer.from_pretrained(model)
     pg = PromptsGenerator(model)
     prompts = pg.generate(2048, 2048*0.3, 4096-1024, 2, show_progress=True)
-    input_id = tokenizer.encode(prompts,
-                                return_tensors='pt').type(torch.int32)
-    print(input_id)
+    # prompts = ['hello', 'hello world']
+    # input_id = tokenizer(prompts,
+    #                      padding=False)
+    # print(input_id)
     l = []
     for i in prompts:
         l.append(len(tokenizer.encode(i)))
