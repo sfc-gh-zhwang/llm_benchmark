@@ -226,6 +226,7 @@ def benchmark_vllm(model, tensor_parallel, num_queries, warmup, prompt_lengths, 
 def benchmark_trtllm(model, tensor_parallel, num_queries, warmup, prompt_lengths, max_new_tokens):
     llm = TrtLLM(engine_dir='/models/trt_engines/llama-2-7b-chat-hf/1-gpu/',
                  tokenizer_dir=model)
+    llm.generate('hello')
 
 
 if __name__ == "__main__":
