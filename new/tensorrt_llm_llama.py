@@ -117,7 +117,7 @@ class TrtLLM:
                                                               pad_id=0)
         print(sampling_config)
         with torch.no_grad():
-            self.decoder.setup(batch_size=batch_size,
+            self.decoder.setup(batch_size=1,
                                max_context_length=max_length,
                                max_new_tokens=1024)
 
