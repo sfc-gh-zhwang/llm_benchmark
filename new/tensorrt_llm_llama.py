@@ -96,7 +96,7 @@ class TrtLLM:
     def generate(self, prompts):
 
         line_encoded = []
-        input_id = self.tokenizer.encode(prompts[0],
+        input_id = self.tokenizer.encode(prompts,
                                          return_tensors='pt').type(torch.int32)
         line_encoded.append(input_id)
         input_lengths = []
