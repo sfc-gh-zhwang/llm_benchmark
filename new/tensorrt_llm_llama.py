@@ -103,15 +103,16 @@ class TrtLLM:
         input_lengths.append(input_id.shape[-1])
         max_length = max(input_lengths)
 
-        pad_id = self.tokenizer.encode(self.tokenizer.pad_token, add_special_tokens=False)[0]
-        end_id = self.tokenizer.encode(self.tokenizer.eos_token, add_special_tokens=False)[0]
+        # pad_id = self.tokenizer.encode(self.tokenizer.pad_token, add_special_tokens=False)[0]
+        # end_id = self.tokenizer.encode(self.tokenizer.eos_token, add_special_tokens=False)[0]
         print(self.decoder.remove_input_padding)
         line_encoded = [
             torch.tensor(t, dtype=torch.int32).cuda() for t in line_encoded
         ]
         input_lengths = torch.tensor(input_lengths, dtype=torch.int32).cuda()
-        sampling_config = tensorrt_llm.runtime.SamplingConfig(end_id=end_id,
-                                                              pad_id=pad_id)
+        sampling_config = tensorrt_llm.runtime.SamplingConfig(end_id=self.tokenizer.eos_token,
+                                                              pad_id=self.tokenizer.pad_token)
+        print(sampling_config)
         with torch.no_grad():
             self.decoder.setup(batch_size=1,
                                max_context_length=4096-1024,
