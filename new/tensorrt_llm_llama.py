@@ -107,11 +107,11 @@ class TrtLLM:
         line_encoded = [
             torch.tensor(t, dtype=torch.int32).cuda() for t in input_id
         ]
-        print(line_encoded)
+        # print(line_encoded)
         input_lengths = torch.tensor(input_lengths, dtype=torch.int32).cuda()
         sampling_config = tensorrt_llm.runtime.SamplingConfig(end_id=2,
                                                               pad_id=0)
-        print(sampling_config)
+        # print(sampling_config)
         with torch.no_grad():
             self.decoder.setup(batch_size=batch_size,
                                max_context_length=max_length,
