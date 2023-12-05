@@ -227,7 +227,7 @@ def benchmark_trtllm(model, tensor_parallel, num_queries, warmup, prompt_lengths
     llm = TrtLLM(engine_dir='/models/trt_engines/llama-2-7b-chat-hf/1-gpu/',
                  tokenizer_dir=model)
     prompt_generator = PromptsGenerator(tokenizer_path=model)
-    prompts = prompt_generator.generate(1024, 1024*0.3, 2048, 1)
+    prompts = prompt_generator.generate(1024, 1024*0.3, 2048, 2)
     llm.generate(prompts, max_new_tokens=1024)
 
 
