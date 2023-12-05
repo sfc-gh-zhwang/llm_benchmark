@@ -301,6 +301,12 @@ def benchmark_trtllm(model, tensor_parallel, num_queries, warmup, prompt_lengths
             f'Load engine takes: {profiler.elapsed_time_in_sec("load tensorrt_llm engine")} sec'
         )
         return decoder
+    
+    def get_engine_name(model, dtype, tp_size, pp_size, rank):
+        if pp_size == 1:
+            return '{}_{}_tp{}_rank{}.engine'.format(model, dtype, tp_size, rank)
+        return '{}_{}_tp{}_pp{}_rank{}.engine'.format(model, dtype, tp_size,
+                                                    pp_size, rank)
 
     tensorrt_llm_llama = TRTLLaMA('/models/trt_engines/llama-2-7b-chat-hf/1-gpu/')
 
