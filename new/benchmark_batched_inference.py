@@ -3,6 +3,8 @@ import argparse
 import time
 import torch
 import gc
+import json
+import os
 from functools import total_ordering
 
 
@@ -228,7 +230,10 @@ def benchmark_trtllm(model, tensor_parallel, num_queries, warmup, prompt_lengths
     from tensorrt_llm.logger import logger
     from tensorrt_llm.quantization import QuantMode
 
-    def TRTLLaMA(args, config):
+    def TRTLLaMA(engine_dir):
+        config_path = os.path.join(engine_dir, 'config.json')
+        with open(config_path, 'r') as f:
+            config = json.load(f)
         dtype = config['builder_config']['precision']
         tp_size = config['builder_config']['tensor_parallel']
         pp_size = config['builder_config']['pipeline_parallel']
@@ -281,9 +286,9 @@ def benchmark_trtllm(model, tensor_parallel, num_queries, warmup, prompt_lengths
 
         engine_name = get_engine_name('llama', dtype, tp_size, pp_size,
                                     runtime_rank)
-        serialize_path = os.path.join(args.engine_dir, engine_name)
+        serialize_path = os.path.join(engine_dir, engine_name)
 
-        tensorrt_llm.logger.set_level(args.log_level)
+        tensorrt_llm.logger.set_level('info')
 
         profiler.start('load tensorrt_llm engine')
         with open(serialize_path, 'rb') as f:
@@ -296,6 +301,8 @@ def benchmark_trtllm(model, tensor_parallel, num_queries, warmup, prompt_lengths
             f'Load engine takes: {profiler.elapsed_time_in_sec("load tensorrt_llm engine")} sec'
         )
         return decoder
+
+    tensorrt_llm_llama = TRTLLaMA('/models/trt_engines/llama-2-7b-chat-hf/1-gpu/')
 
 
 if __name__ == "__main__":
