@@ -4,7 +4,6 @@ import time
 import torch
 import gc
 from functools import total_ordering
-from tensorrt_llm_llama import TrtLLM
 
 
 LLAMA2_MAX_SEQUENCE_LENGTH = 4096
@@ -224,8 +223,35 @@ def benchmark_vllm(model, tensor_parallel, num_queries, warmup, prompt_lengths, 
 
 
 def benchmark_trtllm(model, tensor_parallel, num_queries, warmup, prompt_lengths, max_new_tokens):
-    llm = TrtLLM(engine_dir='/models/trt_engines/llama-2-7b-chat-hf/1-gpu/',
-                 tokenizer_dir=model)
+    from tensorrt_llm_llama import TrtLLM
+    
+    llm = TrtLLM(tokenizer_dir=model)
+
+    prompt_generator = PromptsGenerator(tokenizer_path=model)
+    if warmup > 0:
+        print('warmming up...')
+        warmup_prompts = prompt_generator.generate(1024, 1024*0.3, 2048, warmup)
+        llm.generate(warmup_prompts, max_new_tokens=max_new_tokens)
+        print('warm up finished')
+
+    benchmarks = []
+    for prompt_length in prompt_lengths:
+        for num_query in num_queries:
+            prompt_generator.reset()
+            prompts = prompt_generator.generate(average_token=prompt_length,
+                                                variance=prompt_length*0.3,
+                                                max_token=LLAMA2_MAX_SEQUENCE_LENGTH-max_new_tokens,
+                                                n=num_query,
+                                                show_progress=True)
+            latency, input_lengths, output_lengths = llm.generate(prompts, max_new_tokens=max_new_tokens)
+            benchmarks.append(Benchmark(framework='vllm',
+                                        num_queries=num_query,
+                                        input_length=input_lengths,
+                                        output_length=output_lengths,
+                                        latency=latency,
+                                        tensor_parallel=tensor_parallel))
+            for i in benchmarks:
+                print(i)
     prompt_generator = PromptsGenerator(tokenizer_path=model)
     prompts = prompt_generator.generate(1024, 1024*0.3, 2048, 2)
     latency, input_length, output_length = llm.generate(prompts, max_new_tokens=max_new_tokens)
