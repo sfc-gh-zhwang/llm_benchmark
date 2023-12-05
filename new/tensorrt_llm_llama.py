@@ -99,8 +99,7 @@ class TrtLLM:
         if len(prompts) == 1:
             prompts = prompts[0]
         input_id = self.tokenizer(prompts,
-                                  padding=False,
-                                  return_tensors='pt').type(torch.int32)
+                                  padding=False)
         line_encoded.append(input_id)
         input_lengths = []
         input_lengths.append(input_id.shape[-1])
