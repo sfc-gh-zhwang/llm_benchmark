@@ -31,7 +31,7 @@ class TrtLLM:
                 inputs = [
                     _input("input_ids", np.array(input_id, dtype=np.int32).reshape(1, -1)),
                     _input("input_lengths", np.array([input_length], dtype=np.int32).reshape(1, -1)),
-                    _input("request_output_len", np.array([max_new_tokens], dtype=np.int32).reshape(1, -1)),
+                    _input("request_output_len", np.array([max_new_tokens], dtype=np.uint32).reshape(1, -1)),
                 ]
                 client.infer(model_name, inputs)
             # Create and start n threads
