@@ -252,6 +252,7 @@ def benchmark_trtllm(model, tensor_parallel, num_queries, warmup, prompt_lengths
                                         tensor_parallel=tensor_parallel))
             for i in benchmarks:
                 print(i)
+    return benchmarks
 
 
 if __name__ == "__main__":
