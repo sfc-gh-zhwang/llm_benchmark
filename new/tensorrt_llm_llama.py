@@ -24,27 +24,27 @@ class TrtLLM:
         output_lengths = []
         for i in input_id:
             input_lengths.append(len(i))
-        with grpcclient.InferenceServerClient("localhost:8001", verbose=False) as client:
-            with multiprocessing.Manager() as manager:
-                def send(client, input_id, input_length, i, shared_list):
-                    inputs = [
-                        _input("input_ids", np.array(input_id, dtype=np.int32).reshape(1, -1)),
-                        _input("input_lengths", np.array([input_length], dtype=np.int32).reshape(1, -1)),
-                        _input("request_output_len", np.array([max_new_tokens], dtype=np.uint32).reshape(1, -1)),
-                        _input("end_id", np.array([2], dtype=np.uint32).reshape(1, -1)),
-                    ]
+        with multiprocessing.Manager() as manager:
+            def send(client, input_id, input_length, i, shared_list):
+                inputs = [
+                    _input("input_ids", np.array(input_id, dtype=np.int32).reshape(1, -1)),
+                    _input("input_lengths", np.array([input_length], dtype=np.int32).reshape(1, -1)),
+                    _input("request_output_len", np.array([max_new_tokens], dtype=np.uint32).reshape(1, -1)),
+                    _input("end_id", np.array([2], dtype=np.uint32).reshape(1, -1)),
+                ]
+                with grpcclient.InferenceServerClient("localhost:8001", verbose=False) as client:
                     shared_list[i] = client.infer('tensorrt_llm', inputs).as_numpy('sequence_length').reshape(-1)[0]
-                processes = []
-                shared_list = manager.list([""] * batch_size)
-                start = time.time()
-                for i in range(batch_size):
-                    process = multiprocessing.Process(target=send, args=(client, input_id[i], input_lengths[i], i, shared_list))
-                    processes.append(process)
-                    process.start()
+            processes = []
+            shared_list = manager.list([""] * batch_size)
+            start = time.time()
+            for i in range(batch_size):
+                process = multiprocessing.Process(target=send, args=(None, input_id[i], input_lengths[i], i, shared_list))
+                processes.append(process)
+                process.start()
 
-                for process in processes:
-                    process.join()
-                latency = time.time() - start
-                for i in shared_list:
-                    output_lengths.append(i)
+            for process in processes:
+                process.join()
+            latency = time.time() - start
+            for i in shared_list:
+                output_lengths.append(i)
         return latency, input_lengths, output_lengths
