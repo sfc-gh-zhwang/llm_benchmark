@@ -17,7 +17,7 @@ class TrtLLM:
     def generate(self, prompts, max_new_tokens):
         batch_size = len(prompts)
         input_id = self.tokenizer(prompts,
-                                  padding=False).input_ids
+                                  padding=True).input_ids
         input_lengths = []
         for i in input_id:
             input_lengths.append(len(i))
