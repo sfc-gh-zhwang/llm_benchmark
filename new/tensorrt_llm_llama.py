@@ -32,7 +32,7 @@ class TrtLLM:
                 output = client.infer(model_name, inputs).as_numpy("output_ids")
                 print(output)
             # Create and start n threads
-            send(client, 'tensorrt_llm', input_id[i], input_lengths[i], max_new_tokens)
+            send(client, 'tensorrt_llm', input_id[0], input_lengths[0], max_new_tokens)
 
         output_beams_list = [
             self.tokenizer.batch_decode(output_ids[batch_idx, :,
