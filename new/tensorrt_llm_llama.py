@@ -100,17 +100,16 @@ class TrtLLM:
         #     prompts = prompts[0]
         input_id = self.tokenizer.encode(prompts,
                                          return_tensors='pt').type(torch.int32)
+        print(input_id)
         line_encoded.append(input_id)
         input_lengths = []
         input_lengths.append(input_id.shape[-1])
         max_length = max(input_lengths)
 
-        # pad_id = self.tokenizer.encode(self.tokenizer.pad_token, add_special_tokens=False)[0]
-        # end_id = self.tokenizer.encode(self.tokenizer.eos_token, add_special_tokens=False)[0]
-        print(self.decoder.remove_input_padding)
         line_encoded = [
             torch.tensor(t, dtype=torch.int32).cuda() for t in input_id
         ]
+        print(line_encoded)
         input_lengths = torch.tensor(input_lengths, dtype=torch.int32).cuda()
         sampling_config = tensorrt_llm.runtime.SamplingConfig(end_id=2,
                                                               pad_id=0)
