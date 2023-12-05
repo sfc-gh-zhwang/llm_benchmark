@@ -223,64 +223,79 @@ def benchmark_vllm(model, tensor_parallel, num_queries, warmup, prompt_lengths, 
 
 
 def benchmark_trtllm(model, tensor_parallel, num_queries, warmup, prompt_lengths, max_new_tokens):
-    from vllm import LLM, SamplingParams
-    from vllm.model_executor.parallel_utils.parallel_state import destroy_model_parallel
+    import tensorrt_llm
+    import tensorrt_llm.profiler as profiler
+    from tensorrt_llm.logger import logger
+    from tensorrt_llm.quantization import QuantMode
 
+    def TRTLLaMA(args, config):
+        dtype = config['builder_config']['precision']
+        tp_size = config['builder_config']['tensor_parallel']
+        pp_size = config['builder_config']['pipeline_parallel']
+        world_size = tp_size * pp_size
 
-    # Create an LLM.
-    start = time.time()
-    llm = LLM(model=model, tensor_parallel_size=tensor_parallel)
-    print('took ' + "{:.2f}".format(time.time()-start) + " seconds to start llm engine")
+        assert world_size == tensorrt_llm.mpi_world_size(), \
+            f'Engine world size ({world_size}) != Runtime world size ({tensorrt_llm.mpi_world_size()})'
 
-    # Create a sampling params object.
-    sampling_params = SamplingParams(temperature=0,  # get rid of nondeterminism.
-                                     top_p=1.0,
-                                     top_k=-1,
-                                     max_tokens=max_new_tokens)
+        num_heads = config['builder_config']['num_heads'] // tp_size
+        hidden_size = config['builder_config']['hidden_size'] // tp_size
+        vocab_size = config['builder_config']['vocab_size']
+        num_layers = config['builder_config']['num_layers']
+        use_gpt_attention_plugin = bool(
+            config['plugin_config']['gpt_attention_plugin'])
+        remove_input_padding = config['plugin_config']['remove_input_padding']
+        num_kv_heads = config['builder_config'].get('num_kv_heads', num_heads)
+        paged_kv_cache = config['plugin_config']['paged_kv_cache']
+        tokens_per_block = config['plugin_config']['tokens_per_block']
+        use_custom_all_reduce = config['plugin_config'].get('use_custom_all_reduce',
+                                                            False)
 
-    prompt_generator = PromptsGenerator(tokenizer_path=model)
-    if warmup > 0:
-        print('warmming up...')
-        warmup_prompts = prompt_generator.generate(1024, 1024*0.3, 2048, warmup)
-        llm.generate(warmup_prompts, sampling_params)
-        print('warm up finished')
+        quant_mode = QuantMode(config['builder_config']['quant_mode'])
+        if config['builder_config'].get('multi_query_mode', False):
+            tensorrt_llm.logger.warning(
+                "`multi_query_mode` config is deprecated. Please rebuild the engine."
+            )
+            num_kv_heads = 1
+        num_kv_heads = (num_kv_heads + tp_size - 1) // tp_size
 
-    benchmarks = []
-    for prompt_length in prompt_lengths:
-        for num_query in num_queries:
-            prompt_generator.reset()
-            prompts = prompt_generator.generate(average_token=prompt_length,
-                                                variance=prompt_length*0.3,
-                                                max_token=LLAMA2_MAX_SEQUENCE_LENGTH-max_new_tokens,
-                                                n=num_query,
-                                                show_progress=True)
-            start = time.time()
-            outputs = llm.generate(prompts, sampling_params)
-            latency = time.time() - start
+        model_config = tensorrt_llm.runtime.ModelConfig(
+            vocab_size=vocab_size,
+            num_layers=num_layers,
+            num_heads=num_heads,
+            num_kv_heads=num_kv_heads,
+            hidden_size=hidden_size,
+            paged_kv_cache=paged_kv_cache,
+            tokens_per_block=tokens_per_block,
+            gpt_attention_plugin=use_gpt_attention_plugin,
+            remove_input_padding=remove_input_padding,
+            use_custom_all_reduce=use_custom_all_reduce,
+            dtype=dtype,
+            quant_mode=quant_mode)
 
-            input_lengths = []
-            output_lengths = []
+        runtime_rank = tensorrt_llm.mpi_rank()
+        runtime_mapping = tensorrt_llm.Mapping(world_size,
+                                            runtime_rank,
+                                            tp_size=tp_size,
+                                            pp_size=pp_size)
+        torch.cuda.set_device(runtime_rank % runtime_mapping.gpus_per_node)
 
-            for output in outputs:
-                input_lengths.append(len(output.prompt_token_ids))
-                output_lengths.append(len(output.outputs[0].token_ids))
+        engine_name = get_engine_name('llama', dtype, tp_size, pp_size,
+                                    runtime_rank)
+        serialize_path = os.path.join(args.engine_dir, engine_name)
 
-            benchmarks.append(Benchmark(framework='vllm',
-                                        num_queries=num_query,
-                                        input_length=input_lengths,
-                                        output_length=output_lengths,
-                                        latency=latency,
-                                        tensor_parallel=tensor_parallel))
-            for i in benchmarks:
-                print(i)
+        tensorrt_llm.logger.set_level(args.log_level)
 
-    # Destroy
-    # destroy_model_parallel()
-    # del llm
-    # gc.collect()
-    # torch.cuda.empty_cache()
-    # torch.distributed.destroy_process_group()
-    return benchmarks
+        profiler.start('load tensorrt_llm engine')
+        with open(serialize_path, 'rb') as f:
+            engine_buffer = f.read()
+        decoder = tensorrt_llm.runtime.GenerationSession(model_config,
+                                                        engine_buffer,
+                                                        runtime_mapping)
+        profiler.stop('load tensorrt_llm engine')
+        tensorrt_llm.logger.info(
+            f'Load engine takes: {profiler.elapsed_time_in_sec("load tensorrt_llm engine")} sec'
+        )
+        return decoder
 
 
 if __name__ == "__main__":
