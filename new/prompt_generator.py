@@ -49,11 +49,14 @@ Please summarize the text that is given. Return just the summary and no addition
 
 
 if __name__ == "__main__":
+    import torch
     model = '/Users/zhwang/models/llama-2-7b-chat-hf'
     tokenizer = AutoTokenizer.from_pretrained(model)
     pg = PromptsGenerator(model)
-    prompts = pg.generate(2048, 2048*0.3, 4096-1024, 1024, show_progress=True)
-
+    prompts = pg.generate(2048, 2048*0.3, 4096-1024, 2, show_progress=True)
+    input_id = tokenizer.encode(prompts,
+                                return_tensors='pt').type(torch.int32)
+    print(input_id)
     l = []
     for i in prompts:
         l.append(len(tokenizer.encode(i)))
