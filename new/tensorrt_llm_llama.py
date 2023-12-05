@@ -103,7 +103,7 @@ class TrtLLM:
         input_lengths.append(input_id.shape[-1])
         max_length = max(input_lengths)
 
-        pad_id = self.tokenizer.encode(tokenizer.pad_token, add_special_tokens=False)[0]
-        end_id = self.tokenizer.encode(tokenizer.eos_token, add_special_tokens=False)[0]
+        pad_id = self.tokenizer.encode(self.tokenizer.pad_token, add_special_tokens=False)[0]
+        end_id = self.tokenizer.encode(self.tokenizer.eos_token, add_special_tokens=False)[0]
         print(self.decoder.remove_input_padding)
         return prompts
