@@ -3,12 +3,14 @@ import tritonclient.grpc as grpcclient
 from transformers import AutoTokenizer
 from tritonclient.utils import InferenceServerException, np_to_triton_dtype
 import multiprocessing
+import time
 
 
 def _input(name: str, data: np.ndarray) -> grpcclient.InferInput:
     t = grpcclient.InferInput(name, data.shape, np_to_triton_dtype(data.dtype))
     t.set_data_from_numpy(data)
     return t
+
 
 class TrtLLM:
     def __init__(self, engine_dir, tokenizer_dir):
@@ -19,6 +21,7 @@ class TrtLLM:
         input_id = self.tokenizer(prompts,
                                   padding=False).input_ids
         input_lengths = []
+        output_lengths = []
         for i in input_id:
             input_lengths.append(len(i))
         with grpcclient.InferenceServerClient("localhost:8001", verbose=False) as client:
@@ -33,6 +36,7 @@ class TrtLLM:
                     shared_list[i] = client.infer('tensorrt_llm', inputs).as_numpy('sequence_length').reshape(-1)[0]
                 processes = []
                 shared_list = manager.list([""] * batch_size)
+                start = time.time()
                 for i in range(batch_size):
                     process = multiprocessing.Process(target=send, args=(client, input_id[i], input_lengths[i], i, shared_list))
                     processes.append(process)
@@ -40,6 +44,7 @@ class TrtLLM:
 
                 for process in processes:
                     process.join()
+                latency = time.time() - start
                 for i in shared_list:
-                    print(i)
-        return prompts
+                    output_lengths.append(i)
+        return latency, input_lengths, output_lengths
