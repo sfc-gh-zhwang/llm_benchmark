@@ -29,6 +29,7 @@ class TrtLLM:
                     _input("input_ids", np.array(input_id, dtype=np.int32).reshape(1, -1)),
                     _input("input_lengths", np.array([input_length], dtype=np.int32).reshape(1, -1)),
                     _input("request_output_len", np.array([max_new_tokens], dtype=np.uint32).reshape(1, -1)),
+                    _input("end_id", np.array([2], dtype=np.uint32).reshape(1, -1)),
                 ]
                 output = client.infer(model_name, inputs).as_numpy("output_ids")
                 print(client.infer(model_name, inputs).as_numpy("sequence_length"))
