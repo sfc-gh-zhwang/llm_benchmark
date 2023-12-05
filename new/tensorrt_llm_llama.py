@@ -105,4 +105,5 @@ class TrtLLM:
 
         pad_id = self.tokenizer.encode(tokenizer.pad_token, add_special_tokens=False)[0]
         end_id = self.tokenizer.encode(tokenizer.eos_token, add_special_tokens=False)[0]
+        print(self.decoder.remove_input_padding)
         return prompts
