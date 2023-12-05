@@ -252,9 +252,6 @@ def benchmark_trtllm(model, tensor_parallel, num_queries, warmup, prompt_lengths
                                         tensor_parallel=tensor_parallel))
             for i in benchmarks:
                 print(i)
-    prompt_generator = PromptsGenerator(tokenizer_path=model)
-    prompts = prompt_generator.generate(1024, 1024*0.3, 2048, 2)
-    latency, input_length, output_length = llm.generate(prompts, max_new_tokens=max_new_tokens)
 
 
 if __name__ == "__main__":
