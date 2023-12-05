@@ -22,9 +22,9 @@ class TrtLLM:
         for i in input_id:
             input_lengths.append(len(i))
         import time
-        start = time.time()
         with grpcclient.InferenceServerClient("localhost:8001", verbose=False) as client:
             def send(client, tokenizer, model_name, input_id, input_length, max_new_tokens):
+                start = time.time()
                 inputs = [
                     _input("input_ids", np.array(input_id, dtype=np.int32).reshape(1, -1)),
                     _input("input_lengths", np.array([input_length], dtype=np.int32).reshape(1, -1)),
