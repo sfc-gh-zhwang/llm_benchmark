@@ -40,5 +40,6 @@ class TrtLLM:
 
                 for process in processes:
                     process.join()
-        print(shared_list)
+        for i in shared_list:
+            print(i)
         return prompts
