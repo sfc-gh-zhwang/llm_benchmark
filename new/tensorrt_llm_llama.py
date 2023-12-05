@@ -13,7 +13,7 @@ def _input(name: str, data: np.ndarray) -> grpcclient.InferInput:
 
 
 class TrtLLM:
-    def __init__(self, engine_dir, tokenizer_dir):
+    def __init__(self, tokenizer_dir):
         self.tokenizer = AutoTokenizer.from_pretrained(tokenizer_dir)
 
     def generate(self, prompts, max_new_tokens):
