@@ -21,7 +21,8 @@ class TrtLLM:
         input_lengths = []
         for i in input_id:
             input_lengths.append(len(i))
-
+        import time
+        start = time.time()
         with grpcclient.InferenceServerClient("localhost:8001", verbose=False) as client:
             def send(client, tokenizer, model_name, input_id, input_length, max_new_tokens):
                 inputs = [
@@ -33,6 +34,7 @@ class TrtLLM:
                 print(client.infer(model_name, inputs).as_numpy("sequence_length"))
                 print(output)
                 print(tokenizer.decode(output.reshape(-1)))
+                print(time.time()-start)
             # Create and start n threads
             send(client, self.tokenizer, 'tensorrt_llm', input_id[0], input_lengths[0], max_new_tokens)
 
