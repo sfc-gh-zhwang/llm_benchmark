@@ -81,22 +81,22 @@ parameters: {
     string_value: "/models/trt_engines/llama-2-70b-chat-hf/8-gpu/"
   }
 }
-parameters: {
-  key: "max_tokens_in_paged_kv_cache"
-  value: {
-    string_value: "4096"
-  }
-}
+# parameters: {
+#   key: "max_tokens_in_paged_kv_cache"
+#   value: {
+#     string_value: "4096"
+#   }
+# }
+# parameters: {
+#   key: "max_kv_cache_length"
+#   value: {
+#     string_value: "4096"
+#   }
+# }
 parameters: {
   key: "enable_trt_overlap"
   value: {
     string_value: "False"
-  }
-}
-parameters: {
-  key: "max_kv_cache_length"
-  value: {
-    string_value: "4096"
   }
 }
 parameters: {
