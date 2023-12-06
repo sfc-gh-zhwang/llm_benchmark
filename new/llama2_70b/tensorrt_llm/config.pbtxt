@@ -78,7 +78,7 @@ parameters: {
 parameters: {
   key: "gpt_model_path"
   value: {
-    string_value: "/models/trt_engines/llama-2-70b-chat-hf/1-gpu/"
+    string_value: "/models/trt_engines/llama-2-70b-chat-hf/8-gpu/"
   }
 }
 parameters: {
