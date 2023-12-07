@@ -34,7 +34,7 @@ class TrtLLM:
                 ]
                 with grpcclient.InferenceServerClient("localhost:8001", verbose=False) as client:
                     print(client.infer('tensorrt_llm', inputs).as_numpy('sequence_length'))
-                    shared_list[i] = client.infer('tensorrt_llm', inputs).as_numpy('sequence_length')[0]
+                    shared_list[i] = client.infer('tensorrt_llm', inputs).as_numpy('sequence_length')[0][0]
             processes = []
             shared_list = manager.list([""] * batch_size)
             start = time.time()
