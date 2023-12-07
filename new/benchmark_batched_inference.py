@@ -39,9 +39,10 @@ def parse_args():
                         type=list_of_ints,
                         default='1024')
     parser.add_argument('--framework',
-                        required=True,
+                        #required=True,
                         type=list_of_strings,
-                        default='vllm,mii')
+                        #default='vllm,mii')
+                        default='trtllm')
     parser.add_argument("-tp",
                         "--tensor_parallel",
                         type=int,
