@@ -8,6 +8,7 @@ model_transaction_policy {
 
 dynamic_batching {
   preferred_batch_size: 16
+  max_queue_delay_microseconds: 32
 }
 
 input [
