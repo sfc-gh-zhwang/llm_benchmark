@@ -1,9 +1,14 @@
 name: "tensorrt_llm"
 backend: "tensorrtllm"
-max_batch_size: 1
+max_batch_size: 32
 
 model_transaction_policy {
   decoupled: false
+}
+
+dynamic_batching {
+  preferred_batch_size: 32
+  max_queue_delay_microseconds: 1000
 }
 
 input [
