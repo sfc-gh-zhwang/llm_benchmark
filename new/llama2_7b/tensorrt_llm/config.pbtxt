@@ -8,7 +8,7 @@ model_transaction_policy {
 
 dynamic_batching {
   preferred_batch_size: 16
-  max_queue_delay_microseconds: 32
+  max_queue_delay_microseconds: 1000
 }
 
 input [
@@ -125,6 +125,6 @@ parameters: {
 parameters: {
   key: "kv_cache_free_gpu_mem_fraction"
   value: {
-    string_value: "0.9"
+    string_value: "0.85"
   }
 }
