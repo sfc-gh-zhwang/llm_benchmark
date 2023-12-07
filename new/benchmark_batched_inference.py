@@ -32,7 +32,7 @@ def parse_args():
                         "--warmup",
                         type=int,
                         help="number of queries for warming up",
-                        default=64)
+                        default=0)
     parser.add_argument("-l",
                         "--prompt_length",
                         help="average number of tokens each prompt.",
