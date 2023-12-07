@@ -84,7 +84,7 @@ parameters: {
 parameters: {
   key: "max_tokens_in_paged_kv_cache"
   value: {
-    string_value: "8192"
+    string_value: "41920"
   }
 }
 parameters: {
