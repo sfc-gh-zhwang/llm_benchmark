@@ -84,7 +84,13 @@ parameters: {
 parameters: {
   key: "max_tokens_in_paged_kv_cache"
   value: {
-    string_value: "4096"
+    string_value: "131072"
+  }
+}
+parameters: {
+  key: "kv_cache_free_gpu_mem_fraction"
+  value: {
+    string_value: "0.9"
   }
 }
 parameters: {
