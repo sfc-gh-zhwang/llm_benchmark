@@ -95,7 +95,7 @@ parameters: {
 parameters: {
   key: "enable_trt_overlap"
   value: {
-    string_value: "False"
+    string_value: "True"
   }
 }
 parameters: {
