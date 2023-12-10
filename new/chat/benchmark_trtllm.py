@@ -97,6 +97,7 @@ def benchmark_vllm(
 
     def stream_callback(a, result, error):
         a.push((result.as_numpy('output_sequence_lengths').reshape(-1,)[0], time.time()))
+        print(a)
 
     inputs = [
         _input("text", np.array(query.prompt, dtype=object).reshape(1, -1)),
