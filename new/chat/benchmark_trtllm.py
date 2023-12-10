@@ -121,7 +121,6 @@ def benchmark_vllm(
         id = a[2]
         if output_length >= max_new_tokens or id == 2:
             break
-    print(type(output_length))
     time_to_first_token = token_gen_time[0]
     latency = time.time() - query.start_time
     input_length = [query.input_tokens]
@@ -129,7 +128,7 @@ def benchmark_vllm(
         Benchmark(
             framework='vllm',
             input_length=input_length,
-            output_length=output_length,
+            output_length=int(output_length),
             time_to_first_token=time_to_first_token,
             latency=latency,
             tensor_parallel=8,
