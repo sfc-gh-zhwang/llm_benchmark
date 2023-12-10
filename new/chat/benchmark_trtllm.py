@@ -96,8 +96,7 @@ def benchmark_vllm(
                 time_last_token = time_now
 
     def stream_callback(a, result, error):
-        print(result.as_numpy('output_ids').reshape(-1,)[0])
-        a.put((result.as_numpy('output_sequence_lengths').reshape(-1,)[0], time.time()))
+        a.put((result.as_numpy('output_sequence_lengths').reshape(-1,)[0], time.time(), result.as_numpy('output_ids').reshape(-1,)[0]))
 
     inputs = [
         _input("text", np.array(query.prompt, dtype=object).reshape(1, -1)),
@@ -113,12 +112,13 @@ def benchmark_vllm(
     token_gen_time = []
     output_length = 0
     while True:
-        a = result_queue.get()
+        a = result_queue.get(block=False)
         if a is None:
             break
         print(a)
         output_length += a[0]
         token_gen_time.append(a[1])
+        id = a[2]
 
     time_to_first_token = token_gen_time[0]
     latency = time.time() - query.start_time
