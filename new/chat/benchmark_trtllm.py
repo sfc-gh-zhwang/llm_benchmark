@@ -115,7 +115,6 @@ def benchmark_vllm(
         a = result_queue.get(block=False)
         if a is None:
             break
-        print(a)
         output_length += a[0]
         token_gen_time.append(a[1])
         id = a[2]
