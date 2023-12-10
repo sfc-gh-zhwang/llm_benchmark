@@ -37,13 +37,6 @@ input [
     optional: true
   },
   {
-    name: "pad_id"
-    data_type: TYPE_UINT32
-    dims: [ 1 ]
-    reshape: { shape: [ ] }
-    optional: true
-  },
-  {
     name: "streaming"
     data_type: TYPE_BOOL
     dims: [ 1 ]

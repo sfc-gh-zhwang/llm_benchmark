@@ -1,0 +1,158 @@
+name: "ensemble"
+platform: "ensemble"
+max_batch_size: 1024
+input [
+  {
+    name: "text"
+    data_type: TYPE_STRING
+    dims: [ 1 ]
+  },
+  {
+    name: "max_output_len"
+    data_type: TYPE_INT32
+    dims: [ 1 ]
+  },
+  {
+    name: "end_id"
+    data_type: TYPE_INT32
+    dims: [ 1 ]
+    optional: true
+  },
+]
+output [
+  {
+    name: "output"
+    data_type: TYPE_STRING
+    dims: [ -1, -1 ]
+  },
+  {
+    name: "output_sequence_lengths"
+    data_type: TYPE_UINT32
+    dims: [ -1 ]
+  },
+  {
+    name: "input_sequence_lengths"
+    data_type: TYPE_INT32
+    dims: [ 1 ]
+  }
+]
+ensemble_scheduling {
+  step [
+    {
+      model_name: "tokenizer"
+      model_version: -1
+      input_map {
+        key: "query"
+        value: "text"
+      }
+      input_map {
+        key: "max_output_len"
+        value: "max_output_len"
+      }
+      output_map {
+        key: "input_ids"
+        value: "input_ids"
+      }
+      output_map {
+        key: "sequence_lengths"
+        value: "input_lengths"
+      }
+    },
+    {
+      model_name: "tensorrt_llm"
+      model_version: -1
+      input_map {
+        key: "input_ids"
+        value: "input_ids"
+      }
+      input_map {
+        key: "request_output_len"
+        value: "max_output_len"
+      }
+      input_map {
+        key: "input_lengths"
+        value: "sequence_lengths"
+      }
+      input_map {
+        key: "runtime_top_k"
+        value: "top_k"
+      }
+      input_map {
+        key: "runtime_top_p"
+        value: "top_p"
+      }
+      input_map {
+        key: "beam_search_diversity_rate"
+        value: "beam_search_diversity_rate"
+      }
+      input_map {
+        key: "temperature"
+        value: "temperature"
+      }
+      input_map {
+        key: "len_penalty"
+        value: "len_penalty"
+      }
+      input_map {
+        key: "repetition_penalty"
+        value: "repetition_penalty"
+      }
+      input_map {
+        key: "random_seed"
+        value: "random_seed"
+      }
+      input_map {
+        key: "is_return_log_probs"
+        value: "is_return_log_probs"
+      }
+      input_map {
+        key: "beam_width"
+        value: "beam_width"
+      }
+      input_map {
+        key: "start_id"
+        value: "start_id"
+      }
+      input_map {
+        key: "end_id"
+        value: "end_id"
+      }
+      input_map {
+        key: "stop_words_list"
+        value: "stop_words_list"
+      }
+      input_map {
+        key: "bad_words_list"
+        value: "bad_words_list"
+      }
+      output_map {
+        key: "output_ids"
+        value: "output_ids"
+      }
+      output_map {
+        key: "input_sequence_lengths"
+        value: "input_sequence_lengths"
+      }
+      output_map {
+        key: "sequence_length"
+        value: "output_sequence_lengths"
+      }
+    },
+    {
+      model_name: "$detokenizer_name"
+      model_version: -1
+      input_map {
+        key: "tokens_batch"
+        value: "output_ids"
+      }
+      input_map {
+        key: "input_sequence_lengths"
+        value: "input_sequence_lengths"
+      }
+      output_map {
+        key: "output"
+        value: "output"
+      }
+    }
+  ]
+}
