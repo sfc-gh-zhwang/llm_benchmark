@@ -17,6 +17,12 @@ input [
     data_type: TYPE_UINT32
     dims: [ 1 ]
     optional: true
+  },
+  {
+    name: "stream"
+    data_type: TYPE_BOOL
+    dims: [ 1 ]
+    optional: true
   }
 ]
 output [
@@ -55,6 +61,10 @@ ensemble_scheduling {
       input_map {
         key: "input_ids"
         value: "input_ids"
+      }
+      input_map {
+        key: "stream"
+        value: "stream"
       }
       input_map {
         key: "request_output_len"
