@@ -79,14 +79,6 @@ class TritonPythonModel:
             ids = pb_utils.Tensor("input_ids", ret["input_ids"].astype(np.int32))
 
             len = np.array([[size] for size in np.sum(ret["attention_mask"], axis=1)])
-            max_output_len = pb_utils.get_input_tensor_by_name(request, "max_output_len").as_numpy()[0]
-            max_input_len = np.max(len)
-            if max_input_len + max_output_len > self.max_token_length:
-                responses.append(pb_utils.InferenceResponse(
-                    output_tensors=[],
-                    error=pb_utils.TritonError(f'max_input_len({max_input_len})+max_output_len({max_output_len}) must not exceed '
-                                               f'max number of tokens that the model supports, which is {self.max_token_length}')))
-                continue
             len = pb_utils.Tensor("sequence_lengths", len.astype(np.int32))
             responses.append(pb_utils.InferenceResponse(output_tensors=[ids, len]))
 
