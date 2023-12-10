@@ -27,7 +27,7 @@ output [
     },
     {
         name: "output_sequence_lengths"
-        data_type: TYPE_UINT32
+        data_type: TYPE_INT32
         dims: [ -1 ]
     },
     {
