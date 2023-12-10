@@ -57,6 +57,10 @@ ensemble_scheduling {
         key: "sequence_lengths"
         value: "input_sequence_lengths"
       }
+      output_map {
+        key: "output_ids"
+        value: "output_ids"
+      }
     },
     {
       model_name: "tensorrt_llm"
