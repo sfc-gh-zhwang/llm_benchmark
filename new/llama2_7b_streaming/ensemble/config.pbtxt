@@ -9,7 +9,7 @@ input [
   },
   {
     name: "max_output_len"
-    data_type: TYPE_INT32
+    data_type: TYPE_UINT32
     dims: [ 1 ]
   },
   {
