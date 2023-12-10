@@ -13,6 +13,7 @@ from transformers import AutoTokenizer
 from benchmark_tools import Benchmark, Query, summarize_chat_benchmarks
 import threading
 import multiprocessing
+import multiprocessing as mp
 from common_arg_types import list_of_floats, list_of_ints
 import tritonclient.grpc as grpcclient
 from tritonclient.utils import InferenceServerException, np_to_triton_dtype
@@ -95,30 +96,14 @@ def benchmark_vllm(
                 time_last_token = time_now
 
     def stream_callback(a, result, error):
-        # print('stream_callback')
-        global first_token
-        global st
-        global printed
-        global all_output
-        if error:
-            print('error: ', error)
-        if first_token is None:
-            print('first token: ', time.time()-st)
-            first_token = False
-        output = result.as_numpy('output')
-        # print(output.shape)
-        all_output = output
-        # print('output_ids:', output_ids, result.as_numpy('cum_log_probs'))
-        output = output[0][0].decode()
-
-        print(output[len(printed):], end='||')
-        printed = output
+        a.push((time.time(), result.as_numpy('output_sequence_lengths').reshape(-1,)[0]))
 
     inputs = [
         _input("text", np.array(query.prompt, dtype=object).reshape(1, -1)),
         _input("max_output_len", np.array([max_new_tokens], dtype=np.uint32).reshape(1, -1)),
         _input("end_id", np.array([2], dtype=np.uint32).reshape(1, -1)),
     ]
+    result_queue = mp.Queue()
     with grpcclient.InferenceServerClient("localhost:8001", verbose=False) as client:
         client.start_stream(callback=partial(stream_callback, result_queue))
         client.async_stream_infer('ensemble', inputs)
