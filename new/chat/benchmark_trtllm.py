@@ -7,17 +7,25 @@ import queue
 import random
 import time
 from typing import Iterable, List
+import numpy as np
 import requests
 from transformers import AutoTokenizer
 from benchmark_tools import Benchmark, Query, summarize_chat_benchmarks
 import threading
 import multiprocessing
 from common_arg_types import list_of_floats, list_of_ints
+import tritonclient.grpc as grpcclient
+from tritonclient.utils import InferenceServerException, np_to_triton_dtype
+from functools import partial
 
 from prompt_generator import PromptsGenerator
 
 MAX_SEQUENCE_LENGTH = 4096
 
+def _input(name: str, data: np.ndarray) -> grpcclient.InferInput:
+    t = grpcclient.InferInput(name, data.shape, np_to_triton_dtype(data.dtype))
+    t.set_data_from_numpy(data)
+    return t
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Benchmark inference")
@@ -75,19 +83,6 @@ def benchmark_vllm(
     max_new_tokens: int,
     query: Query,
 ) -> List[Benchmark]:
-    api_url = "http://localhost:8000/generate"
-    headers = {"User-Agent": "Benchmark Client"}
-    pload = {
-        "prompt": prompts[0],
-        "n": 1,
-        "use_beam_search": False,
-        "temperature": 0,
-        "top_p": 0.9,
-        "top_k": 1,
-        "max_tokens": max_new_tokens,
-        "ignore_eos": False,
-        "stream": True,
-    }
 
     def get_streaming_response(response: requests.Response, time_last_token) -> Iterable[List[str]]:
         for chunk in response.iter_lines(chunk_size=8192, decode_unicode=False,
@@ -99,7 +94,34 @@ def benchmark_vllm(
                 yield output, time_now - time_last_token
                 time_last_token = time_now
 
-    response = requests.post(api_url, headers=headers, json=pload, stream=True)
+    def stream_callback(a, result, error):
+        # print('stream_callback')
+        global first_token
+        global st
+        global printed
+        global all_output
+        if error:
+            print('error: ', error)
+        if first_token is None:
+            print('first token: ', time.time()-st)
+            first_token = False
+        output = result.as_numpy('output')
+        # print(output.shape)
+        all_output = output
+        # print('output_ids:', output_ids, result.as_numpy('cum_log_probs'))
+        output = output[0][0].decode()
+
+        print(output[len(printed):], end='||')
+        printed = output
+
+    inputs = [
+        _input("text", np.array(query.prompt, dtype=object).reshape(1, -1)),
+        _input("max_output_len", np.array([max_new_tokens], dtype=np.uint32).reshape(1, -1)),
+        _input("end_id", np.array([2], dtype=np.uint32).reshape(1, -1)),
+    ]
+    with grpcclient.InferenceServerClient("localhost:8001", verbose=False) as client:
+        client.start_stream(callback=partial(stream_callback, result_queue))
+        client.async_stream_infer('ensemble', inputs)
     token_gen_time = []
     last_response = ""
     for h, t in get_streaming_response(response, query.start_time):
