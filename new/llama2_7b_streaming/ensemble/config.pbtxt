@@ -19,7 +19,7 @@ input [
     optional: true
   },
   {
-    name: "stream"
+    name: "streaming"
     data_type: TYPE_BOOL
     dims: [ 1 ]
     optional: true
@@ -63,8 +63,8 @@ ensemble_scheduling {
         value: "input_ids"
       }
       input_map {
-        key: "stream"
-        value: "stream"
+        key: "streaming"
+        value: "streaming"
       }
       input_map {
         key: "request_output_len"
