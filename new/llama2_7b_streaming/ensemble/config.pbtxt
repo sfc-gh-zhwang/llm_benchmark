@@ -70,8 +70,8 @@ ensemble_scheduling {
         value: "max_output_len"
       }
       input_map {
-        key: "input_sequence_lengths"
-        value: "sequence_lengths"
+        key: "input_lengths"
+        value: "input_sequence_lengths"
       }
       input_map {
         key: "end_id"
