@@ -103,8 +103,12 @@ def benchmark_mii(model, tensor_parallel, num_queries, warmup, prompt_lengths, m
     from deepspeed.inference.v2.ragged import DSStateManagerConfig
 
     tp_config = DeepSpeedTPConfig(tp_size=tensor_parallel)
-    mgr_config = DSStateManagerConfig(max_ragged_batch_size=128*tensor_parallel,
-                                      max_ragged_sequence_count=128*tensor_parallel)
+    # for 40GiB
+    # mgr_config = DSStateManagerConfig(max_ragged_batch_size=128*tensor_parallel,
+    #                                   max_ragged_sequence_count=128*tensor_parallel)
+    # for 80GiB
+    mgr_config = DSStateManagerConfig(max_ragged_batch_size=256*tensor_parallel,
+                                      max_ragged_sequence_count=256*tensor_parallel)
     inference_config = RaggedInferenceEngineConfig(tensor_parallel=tp_config,
                                                    state_manager=mgr_config)
     start = time.time()
