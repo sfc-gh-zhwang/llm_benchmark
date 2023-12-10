@@ -96,8 +96,6 @@ def benchmark_vllm(
                 time_last_token = time_now
 
     def stream_callback(a, result, error):
-        print(error)
-        print('output_sequence_lengths: ', result.as_numpy('output_ids').reshape(-1,)[0])
         a.put((result.as_numpy('output_sequence_lengths').reshape(-1,)[0], time.time()))
 
     inputs = [
@@ -111,11 +109,12 @@ def benchmark_vllm(
         client.start_stream(callback=partial(stream_callback, result_queue))
         client.async_stream_infer('ensemble', inputs)
     token_gen_time = []
+    output_length = 0
     while True:
         a = result_queue.get()
         if a is None:
             break
-        output_length = a[0]
+        output_length += a[0]
         token_gen_time.append(a[1])
 
     time_to_first_token = token_gen_time[0]
