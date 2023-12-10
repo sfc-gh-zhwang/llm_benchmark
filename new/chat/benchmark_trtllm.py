@@ -130,6 +130,7 @@ def benchmark_vllm(
             tensor_parallel=8,
         )
     ])
+    print(benchmarks)
 
     return benchmarks
 
