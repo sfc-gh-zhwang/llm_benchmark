@@ -96,6 +96,7 @@ def benchmark_vllm(
                 time_last_token = time_now
 
     def stream_callback(a, result, error):
+        print(error)
         print('output_sequence_lengths: ', result.as_numpy('output_sequence_lengths').reshape(-1,)[0])
         a.put((result.as_numpy('output_sequence_lengths').reshape(-1,)[0], time.time()))
 
