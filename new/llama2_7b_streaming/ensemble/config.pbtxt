@@ -29,11 +29,6 @@ output [
         name: "output_sequence_lengths"
         data_type: TYPE_INT32
         dims: [ -1 ]
-    },
-    {
-        name: "input_sequence_lengths"
-        data_type: TYPE_INT32
-        dims: [ 1 ]
     }
 ]
 ensemble_scheduling {
