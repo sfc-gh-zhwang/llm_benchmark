@@ -96,7 +96,7 @@ def benchmark_vllm(
                 time_last_token = time_now
 
     def stream_callback(a, result, error):
-        a.push((time.time(), result.as_numpy('output_sequence_lengths').reshape(-1,)[0]))
+        a.push((result.as_numpy('output_sequence_lengths').reshape(-1,)[0], time.time()))
 
     inputs = [
         _input("text", np.array(query.prompt, dtype=object).reshape(1, -1)),
@@ -108,20 +108,13 @@ def benchmark_vllm(
         client.start_stream(callback=partial(stream_callback, result_queue))
         client.async_stream_infer('ensemble', inputs)
     token_gen_time = []
-    last_response = ""
-    for h, t in get_streaming_response(response, query.start_time):
-        last_response = h
+    for h, t in result_queue:
+        output_length = h
         token_gen_time.append(t)
 
     time_to_first_token = token_gen_time[0]
     latency = time.time() - query.start_time
-
-    tokenizer = AutoTokenizer.from_pretrained(model)
-    output_token_ids = tokenizer.encode(last_response)
-
     input_length = [query.input_tokens]
-    output_length = [len(output_token_ids) - query.input_tokens]
-
     benchmarks = ([
         Benchmark(
             framework='vllm',
