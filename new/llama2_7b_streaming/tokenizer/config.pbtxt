@@ -7,12 +7,6 @@ input [
         data_type: TYPE_STRING
         dims: [ 1 ]
         reshape: { shape: [ ] }
-    },
-    {
-        name: "max_output_len"
-        data_type: TYPE_UINT32
-        dims: [ 1 ]
-        reshape: { shape: [ ] }
     }
 ]
 output [

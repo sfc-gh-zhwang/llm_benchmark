@@ -45,10 +45,6 @@ ensemble_scheduling {
         key: "query"
         value: "text"
       }
-      input_map {
-        key: "max_output_len"
-        value: "max_output_len"
-      }
       output_map {
         key: "input_ids"
         value: "input_ids"
