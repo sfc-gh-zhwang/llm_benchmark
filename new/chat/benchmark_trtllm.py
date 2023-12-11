@@ -96,6 +96,8 @@ def benchmark_vllm(
                 time_last_token = time_now
 
     def stream_callback(a, result, error):
+        if error:
+            print(error)
         a.put((result.as_numpy('output_sequence_lengths').reshape(-1,)[0], time.time(), result.as_numpy('output_ids').reshape(-1,)[0]))
 
     tokenizer = AutoTokenizer.from_pretrained(model)
