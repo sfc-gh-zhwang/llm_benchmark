@@ -98,12 +98,25 @@ def benchmark_vllm(
     def stream_callback(a, result, error):
         a.put((result.as_numpy('output_sequence_lengths').reshape(-1,)[0], time.time(), result.as_numpy('output_ids').reshape(-1,)[0]))
 
+    tokenizer = AutoTokenizer.from_pretrained(model)
+    input_id = tokenizer(prompts, padding=False).input_ids
+    input_lengths = []
+    for i in input_id:
+        input_lengths.append(len(i))
+    # with multiprocessing.Manager() as manager:
+    #     def send(client, input_id, input_length, i, shared_list):
     inputs = [
-        _input("text", np.array(query.prompt, dtype=object).reshape(1, -1)),
-        _input("max_output_len", np.array([max_new_tokens], dtype=np.uint32).reshape(1, -1)),
+        _input("input_ids", np.array(input_id, dtype=np.int32).reshape(1, -1)),
+        _input("input_lengths", np.array([input_length], dtype=np.int32).reshape(1, -1)),
+        _input("request_output_len", np.array([max_new_tokens], dtype=np.uint32).reshape(1, -1)),
         _input("end_id", np.array([2], dtype=np.uint32).reshape(1, -1)),
-        _input("streaming", np.array([True], dtype=np.bool_).reshape(1, -1)),
     ]
+    # inputs = [
+    #     _input("text", np.array(query.prompt, dtype=object).reshape(1, -1)),
+    #     _input("max_output_len", np.array([max_new_tokens], dtype=np.uint32).reshape(1, -1)),
+    #     _input("end_id", np.array([2], dtype=np.uint32).reshape(1, -1)),
+    #     _input("streaming", np.array([True], dtype=np.bool_).reshape(1, -1)),
+    # ]
     result_queue = mp.Queue()
     with grpcclient.InferenceServerClient("localhost:8001", verbose=False) as client:
         client.start_stream(callback=partial(stream_callback, result_queue))
