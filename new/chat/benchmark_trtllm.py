@@ -136,7 +136,6 @@ def benchmark_vllm(
         output_length += a[0]
         token_gen_time.append(a[1])
         id = a[2]
-        print(output_length, id)
         if output_length >= max_new_tokens or id == 2:
             break
     time_to_first_token = token_gen_time[0] - query.start_time
