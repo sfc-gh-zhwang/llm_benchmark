@@ -29,7 +29,7 @@ class TritonPythonModel:
           * model_version: Model version
           * model_name: Model name
         """
-        tokenizer_dir = '/models/llama-2-7b-chat-hf/'
+        tokenizer_dir = '/models/llama-2-70b-chat-hf/'
         logger = pb_utils.Logger
         logger.log(f'Initializing tokenizer from {tokenizer_dir}')
         self.tokenizer = AutoTokenizer.from_pretrained(tokenizer_dir)
