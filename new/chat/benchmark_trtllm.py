@@ -268,7 +268,7 @@ def run_vllm_benchmarks(
                 i = 0
                 total_queries_sent = 0
                 time_start = time.time()
-                while time.time() - time_start < 300:
+                while time.time() - time_start < 5:
                     if i >= len(prompts):
                         i = 0
                     query_queue.put(Query(prompts[i]))
