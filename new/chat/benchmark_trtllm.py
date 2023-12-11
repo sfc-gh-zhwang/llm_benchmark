@@ -264,7 +264,7 @@ def run_vllm_benchmarks(
                         average_token=prompt_length,
                         variance=prompt_length*0.3,
                         max_token=MAX_SEQUENCE_LENGTH-max_new_tokens,
-                        n=3,
+                        n=100,
                         show_progress=True,
                     )
                 )
@@ -273,7 +273,7 @@ def run_vllm_benchmarks(
                 i = 0
                 total_queries_sent = 0
                 time_start = time.time()
-                while time.time() - time_start < 5:
+                while time.time() - time_start < 300:
                     if i >= len(prompts):
                         i = 0
                     query_queue.put(Query(prompts[i]))
