@@ -72,9 +72,15 @@ def summarize_chat_benchmarks(
     avg_time_to_first_token = avg_float([benchmark.time_to_first_token for benchmark in benchmarks])
     max_time_to_first_token = max([benchmark.time_to_first_token for benchmark in benchmarks])
 
-    min_latency = min([benchmark.latency for benchmark in benchmarks])
-    avg_latency = avg_float([benchmark.latency for benchmark in benchmarks])
-    max_latency = max([benchmark.latency for benchmark in benchmarks])
+    latencies = [benchmark.latency for benchmark in benchmarks].sort()
+    min_latency = min(latencies)
+    avg_latency = avg_float(latencies)
+    max_latency = max(latencies)
+
+    p50_latency = latencies[int(0.5 * len(latencies))]
+    p90_latency = latencies[int(0.9 * len(latencies))]
+    p95_latency = latencies[int(0.95 * len(latencies))]
+    p99_latency = latencies[int(0.99 * len(latencies))]
 
     # print('!!!---Printing results---!!!')
     # # Output results as a csv
@@ -101,13 +107,21 @@ def summarize_chat_benchmarks(
     print(f"min_latency: {min_latency}")
     print(f"avg_latency: {avg_latency}")
     print(f"max_latency: {max_latency}")
+    print(f"p50_latency: {p50_latency}")
+    print(f"p90_latency: {p90_latency}")
+    print(f"p95_latency: {p95_latency}")
+    print(f"p99_latency: {p99_latency}")
 
     summarization_results = f"{framework}" \
         f", {queries_per_second: .2f}" \
         f", {avg_token_input}" \
         f", {avg_token_output}" \
         f", {avg_time_to_first_token: .3f}" \
-        f", {avg_latency: .2f}"
-    print('framework, qps, avg_token_input, avg_token_output, avg_time_to_first_token, avg_latency',)
+        f", {avg_latency: .2f}" \
+        f", {p50_latency: .2f}" \
+        f", {p90_latency: .2f}" \
+        f", {p95_latency: .2f}" \
+        f", {p99_latency: .2f}"
+    print('framework, qps, avg_token_input, avg_token_output, avg_time_to_first_token, avg_latency, p50_latency, p90_latency, p95_latency, p99_latency')
     print(summarization_results)
     return summarization_results
