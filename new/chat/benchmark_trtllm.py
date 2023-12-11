@@ -123,7 +123,7 @@ def benchmark_vllm(
     result_queue = mp.Queue()
     with grpcclient.InferenceServerClient("localhost:8001", verbose=False) as client:
         client.start_stream(callback=partial(stream_callback, result_queue))
-        client.async_stream_infer('ensemble', inputs)
+        client.async_stream_infer('tensorrt_llm', inputs)
         client.stop_stream()
     token_gen_time = []
     output_length = 0
