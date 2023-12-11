@@ -143,7 +143,7 @@ def benchmark_vllm(
     input_length = [query.input_tokens]
     benchmarks = ([
         Benchmark(
-            framework='vllm',
+            framework='trtllm',
             input_length=input_length,
             output_length=[int(output_length)],
             time_to_first_token=time_to_first_token,
@@ -151,7 +151,6 @@ def benchmark_vllm(
             tensor_parallel=8,
         )
     ])
-    print(benchmarks)
 
     return benchmarks
 
