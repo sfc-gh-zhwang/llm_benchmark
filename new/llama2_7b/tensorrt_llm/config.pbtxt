@@ -113,7 +113,7 @@ parameters: {
 parameters: {
   key: "max_num_sequences"
   value: {
-    string_value: "96"
+    string_value: "256"
   }
 }
 parameters: {
