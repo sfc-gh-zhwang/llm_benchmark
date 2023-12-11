@@ -6,11 +6,6 @@ model_transaction_policy {
   decoupled: true
 }
 
-# dynamic_batching {
-#   preferred_batch_size: 16
-#   max_queue_delay_microseconds: 1000
-# }
-
 input [
   {
     name: "input_ids"
@@ -82,7 +77,7 @@ parameters: {
 parameters: {
   key: "gpt_model_path"
   value: {
-    string_value: "/models/trt_engines/llama-2-70b-chat-hf/1-gpu/"
+    string_value: "/models/trt_engines/llama-2-70b-chat-hf/8-gpu/"
   }
 }
 parameters: {
@@ -92,15 +87,21 @@ parameters: {
   }
 }
 parameters: {
-  key: "enable_trt_overlap"
+  key: "kv_cache_free_gpu_mem_fraction"
   value: {
-    string_value: "True"
+    string_value: "0.9"
   }
 }
 parameters: {
   key: "max_kv_cache_length"
   value: {
     string_value: "4096"
+  }
+}
+parameters: {
+  key: "enable_trt_overlap"
+  value: {
+    string_value: "False"
   }
 }
 parameters: {
@@ -112,18 +113,12 @@ parameters: {
 parameters: {
   key: "max_num_sequences"
   value: {
-    string_value: "96"
+    string_value: "64"
   }
 }
 parameters: {
   key: "exclude_input_in_output"
   value: {
     string_value: "true"
-  }
-}
-parameters: {
-  key: "kv_cache_free_gpu_mem_fraction"
-  value: {
-    string_value: "0.85"
   }
 }
