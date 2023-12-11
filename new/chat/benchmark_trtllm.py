@@ -112,6 +112,7 @@ def benchmark_vllm(
         _input("input_lengths", np.array(input_lengths, dtype=np.int32).reshape(1, -1)),
         _input("request_output_len", np.array([max_new_tokens], dtype=np.uint32).reshape(1, -1)),
         _input("end_id", np.array([2], dtype=np.uint32).reshape(1, -1)),
+        _input("streaming", np.array([True], dtype=np.bool_).reshape(1, -1)),
     ]
     # inputs = [
     #     _input("text", np.array(query.prompt, dtype=object).reshape(1, -1)),
