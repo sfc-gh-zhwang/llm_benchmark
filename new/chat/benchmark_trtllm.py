@@ -121,6 +121,7 @@ def benchmark_vllm(
     #     _input("streaming", np.array([True], dtype=np.bool_).reshape(1, -1)),
     # ]
     result_queue = mp.Queue()
+    start = time.time()
     with grpcclient.InferenceServerClient("localhost:8001", verbose=False) as client:
         client.start_stream(callback=partial(stream_callback, result_queue))
         client.async_stream_infer('tensorrt_llm', inputs)
@@ -138,7 +139,7 @@ def benchmark_vllm(
         print(output_length, id)
         if output_length >= max_new_tokens or id == 2:
             break
-    time_to_first_token = token_gen_time[0]
+    time_to_first_token = token_gen_time[0] - query.start_time
     latency = time.time() - query.start_time
     input_length = [query.input_tokens]
     benchmarks = ([
