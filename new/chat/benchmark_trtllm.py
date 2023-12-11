@@ -131,7 +131,7 @@ def benchmark_vllm(
     while True:
         try:
             a = result_queue.get(block=False)
-        except:
+        except Exception:
             break
         print(a)
         output_length += a[0]
