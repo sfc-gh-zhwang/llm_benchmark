@@ -214,7 +214,7 @@ def run_vllm_benchmarks(
             runnable_cls = multiprocessing.Process
             barrier_cls = multiprocessing.Barrier
             queue_cls = multiprocessing.Queue
-        
+
         barrier = barrier_cls(client_num + 1)
         query_queue = queue_cls()
         result_queue = queue_cls()
