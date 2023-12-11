@@ -3,6 +3,7 @@ import asyncio
 import gc
 import json
 import os
+import traceback
 import queue
 import random
 import time
@@ -298,6 +299,7 @@ def run_vllm_benchmarks(
             print(summarization_result)
 
     except Exception as e:
+        traceback.print_exc()
         print(f"error: {repr(e)}")
 
 
