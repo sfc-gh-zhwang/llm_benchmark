@@ -38,6 +38,7 @@ Please summarize the text that is given. Return just the summary and no addition
             prompt = f'''[INST]<<SYS>>
 Please summarize the text that is given. Return just the summary and no additional conversational dialog such as ""Sure, here is the summary of the text:"".
 <</SYS>> {prompt} [/INST]'''
+            print(len(self.tokenizer.encode(prompt)))
             prompts.append((prompt, len(self.tokenizer.encode(prompt))))
         return prompts
 
